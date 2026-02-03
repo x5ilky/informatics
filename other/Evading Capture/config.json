@@ -1,0 +1,10 @@
+{
+  "basename": "Evading_Capture",
+  "filename": "Evading_Capture.cpp",
+  "language": "cpp",
+  "testCaseFileNames": [
+    "fin1",
+    "fin2",
+    "fin3"
+  ]
+}

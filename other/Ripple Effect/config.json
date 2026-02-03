@@ -1,0 +1,9 @@
+{
+  "basename": "Ripple_Effect",
+  "filename": "Ripple_Effect.cpp",
+  "language": "cpp",
+  "testCaseFileNames": [
+    "fin1",
+    "fin2"
+  ]
+}

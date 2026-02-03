@@ -1,0 +1,9 @@
+{
+  "basename": "C___Concat_(X-th)",
+  "filename": "C___Concat_(X-th).cpp",
+  "language": "cpp",
+  "testCaseFileNames": [
+    "fin1",
+    "fin2"
+  ]
+}

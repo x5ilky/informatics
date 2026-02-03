@@ -1,0 +1,10 @@
+{
+  "basename": "D__Maximum_Sum_of_Products",
+  "filename": "D__Maximum_Sum_of_Products.cpp",
+  "language": "cpp",
+  "testCaseFileNames": [
+    "fin1",
+    "fin2",
+    "fin3"
+  ]
+}

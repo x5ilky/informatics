@@ -1,0 +1,10 @@
+{
+  "basename": "Beautiful_Buildings",
+  "filename": "Beautiful_Buildings.cpp",
+  "language": "cpp",
+  "testCaseFileNames": [
+    "fin1",
+    "fin2",
+    "fin3"
+  ]
+}

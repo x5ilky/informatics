@@ -1,0 +1,10 @@
+{
+  "basename": "Composing_Pyramids",
+  "filename": "Composing_Pyramids.cpp",
+  "language": "cpp",
+  "testCaseFileNames": [
+    "fin1",
+    "fin2",
+    "fin3"
+  ]
+}
