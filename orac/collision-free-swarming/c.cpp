@@ -46,8 +46,6 @@ int main() {
             auto [r2, c2] = v;
 
             if ((r2+c2)%2 != (r+c)%2) continue;
-            if (c2 < c) continue;
-            if (r2 < r) continue;
             if (r == r2) {
                 int mid = (coord_to_xpos[c] + coord_to_xpos[c2])/2;
                 int ts = coord_to_ypos[r];
@@ -61,6 +59,20 @@ int main() {
                 chexists(row_right, mid, max, ts-1);
                 chexists(row_left, mid, min, ts+1);
                 continue;
+            } else {
+                if (c2 < c) continue;
+                int x1 = coord_to_xpos[c], y1 = coord_to_ypos[r];
+                int x2 = coord_to_xpos[c2], y2 = coord_to_ypos[r2];
+
+                if (y2-y1 == x2-x1) {
+                    // topright bottomleft square
+                } else if (y1-y2 == x2-x1) { 
+                    // topleft bottomright square
+                } else if (y2 > y1) {
+                    // topleft bottomright rect
+                } else if (x2 > x1) {
+                    // topright bottomleft rect
+                }
             }
         }
     }
