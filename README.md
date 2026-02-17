@@ -7,3 +7,8 @@ Most problems are organised by the platform the problem was found on, old impls 
 
 > [!WARNING]
 > Not all implementations may be written by me or another human, some may be references for case generation from LLM's. 
+
+Accounts:
+* Atcoder: [`x5ilky`](https://atcoder.jp/users/x5ilky)
+* Codeforces: [`Silkyway`](https://codeforces.com/profile/Silkyway)
+* Orac: `5ilky`
