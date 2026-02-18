@@ -65,7 +65,6 @@ signed main() {
             if (r > K) break;
             if (reachable.find(2*K-r) != reachable.end()) {
                 candidates.push_back(r);
-                break;
             }
         }
         
@@ -104,12 +103,17 @@ signed main() {
                 lo[head(a+N)] = min(lo[head(a+N)], {v, b});
                 rp--;
             }
-            for (int i = 1; i <= N+1; i += N) {
-                int a = hi[head(i)].first, b = lo[head(i)].first;
+            for (int i = 0; i <= N; i += N) {
+                if (head(i+1) != head(i+N)) continue;
+                int a = hi[head(i+1)].first, b = lo[head(i+1)].first;
                 if ((a < DIS and b > DIS) or (a > DIS and b < DIS)) {
-                    printf("found even: %d, ", cand);
-                    can = true;
-                    goto exit;
+                    if (a > DIS) a -= DIS;
+                    if (b > DIS) b -= DIS;
+                    if ((a == cand and b == 2*K-cand) or (a == 2*K-cand and b == cand)) {
+                        printf("found even: %lld, %lld %lld", cand, a, b);
+                        can = true;
+                        goto exit;
+                    }
                 }
             }
         }
