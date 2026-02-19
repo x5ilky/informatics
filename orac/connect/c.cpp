@@ -8,10 +8,10 @@ int main() {
     vector<pii> starts, ends;
     for (int i = 1; i <= 2*N; i++) {
         int v; cin >> v;
-        if (start[i] == -1) {
-            start[i] = v;
+        if (starts[i] == -1) {
+            starts[i] = v;
         } else {
-            end[i] = v;
+            ends[i] = v;
         }
     }
     int wrong = 0;
