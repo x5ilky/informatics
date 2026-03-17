@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
-
+ 
 using namespace std;
-
+ 
 int main() {
     int N,a,b;cin>>N>>a>>b;
     vector<int>A(N+1),B(N+1);
