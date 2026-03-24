@@ -19,7 +19,7 @@ signed main() {
         pyc[c]=yc;
     }
     auto len=[&](int s){
-        int a=X.size(),b=Y.size(),c=a+b;
+        i128 a=X.size(),b=Y.size(),c=a+b;
         for (int i=1;i<=s-1;i++){
             a=b;
             b=c;
@@ -28,7 +28,7 @@ signed main() {
         return a;
     };
     auto bc=[&](int C,int s){
-        int a=pxc[C][X.size()],b=pyc[C][Y.size()],c=a+b;
+        i128 a=pxc[C][X.size()],b=pyc[C][Y.size()],c=a+b;
         for (int i=1;i<=s-1;i++){
             a=b;
             b=c;
@@ -41,7 +41,7 @@ signed main() {
         if(p<=0)return (i128)0;
         if(s==1)return (i128)pxc[c][p];
         if(s==2)return (i128)pyc[c][p];
-        int la=len(s-1);
+        i128 la=len(s-1);
         if(p<=la){
             return f(c,s-1,p);
         } else {
@@ -52,6 +52,6 @@ signed main() {
     int Q;cin>>Q;
     for(int q=1;q<=Q;q++){
         ll l,r;string c;cin>>l>>r>>c;
-        cout<<(ll)(f(c[0]-'a',90,r)-f(c[0]-'a',90,l-1))<<endl;
+        cout<<(ll)(f(c[0]-'a',88,r)-f(c[0]-'a',88,l-1))<<endl;
     }
 }
