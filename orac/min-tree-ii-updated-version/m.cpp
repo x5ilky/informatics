@@ -41,3 +41,32 @@ int main() {
         else st.update(1,1,N,a,b);
     }
 }
+
+// begin signature
+// +----------------------------------------+
+// |                                        |
+// |                                        |
+// |                                        |
+// |          .^:;II;:^'                    |
+// |        `;!~_-??-_~!;^                  |
+// |       ^l~-)|/tt/\)?+l,                 |
+// |      `I~-(/jbkkbrt(?~I^'`^^^^`.        |
+// |      ^I+?|txh**hxf\1+lli~++++~!l;^     |
+// |      ';i-)\frbbrf/(11??)(||||(1?+iI^   |
+// |       `;i_?(|\\//ttfft/frxxxrjt\(?+!:. |
+// |  ^,:,'';i_1|tjxbkbhhhkxka*#*oabrt|1+l, |
+// |`Ii+_+!:l+1|fxho#M#M&M*h*M8%%&Mokj/(-i;'|
+// |,!_1(?~I!_)\fba#&%&W8W#a*W%@B8Mokr/(-~I^|
+// |':li~!I^l+?|trbao*oaoahbho#MM##*hbj\)_i:|
+// |   ''.  ,l+?(\fjrxrjjjftjxba#&8Mokr/(-i;|
+// |         ^Ii_?1(||(())1)|trbhooakxf\1_!:|
+// |           ^;l!i~~~ii!!+?(\tjrrjf/|1_i;'|
+// |              .'```'. ^Ii+-1)(()1?_~l,. |
+// |                        `:I!iiii!l;^.   |
+// |                            .''.        |
+// +----------------------------------------+
+// 2026 (March 30th) 16:38:42
+// end signature
+
+
+
