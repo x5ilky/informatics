@@ -9,8 +9,14 @@ int main() {
     for(int i=1;i<=2*N;i++)HEAD[i]=i;
 
     function<int(int)> head=[&](int n){
+        if(HEAD[n]==n){
+            if(fl[n])col[n]^=1,fl[n]=0;
+            return n;
+        }
+        int p=HEAD[n],r=head(p);
         if(fl[n])col[n]^=1,fl[n]=0;
-        return HEAD[n]==n?n:HEAD[n]=head(HEAD[n]);
+        col[n]^=col[p];
+        return HEAD[n]=r;
     };
     function<int(int)> color=[&](int n){
         return head(n),col[n];
@@ -20,10 +26,11 @@ int main() {
         bl[u]=sz[u]-bl[u];
     };
     function<void(int,int)>join=[&](int u,int v){
+        int cu=color(u),cv=color(v);
         u=head(u),v=head(v);
         if(u==v)return;
-        if(sz[u]<sz[v])swap(u,v);
-        if(color(u)==color(v)) flip(v);
+        if(sz[u]<sz[v])swap(u,v),swap(cu,cv);
+        if(cu==cv) flip(v);
         sz[u]+=sz[v];
         bl[u]+=bl[v];
         HEAD[v]=u;
@@ -35,7 +42,7 @@ int main() {
             ans-=bl[head(u)];
         } else {
             ans-=bl[head(u)];
-            ans-=bl[head(v)];
+            ans-=bl[head(v+N)];
         }
         join(u,v+N);
         join(v,u+N);
