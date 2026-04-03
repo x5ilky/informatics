@@ -40,27 +40,23 @@ int subtask2(int N, int M) {
     assert(false);
 }
 int subtask3(int N, int M) {
-    int sus = -1;
-    vector<int> gt, le;
-    for (int i = 0; i < N-M+1; i++) {
-        vector<int> query;
-        for (int k = 0; k < M-1; k++)
-            query.push_back(k);
-        query.push_back(M-1+i);
-        int amt = ask_host(query);
-        if (sus == -1) sus = amt;
-        if (amt == sus) {
-
+    if(M<=(N+1)/2){
+        int Q=(N+1)/2+1;
+        map<int,int>freq;
+        for(int i=1;i<=Q;i++){
+            vector<int>q;
+            for(int j=1;j<=Q;j++){
+                if(j!=i)q.push_back(j);
+            }
+            freq[ask_host(q)]++;
         }
-        printf("%d\n", amt);
+        return Q-freq.rbegin()->second;
     }
-    return 0;
 }
 
 int find_K(int N, int M, int subtask) {
     if (subtask == 1) return subtask1(N);
     if (subtask == 2) return subtask2(N, M);
     if (subtask == 3) return subtask3(N, M);
-
-    return 1; // we guess K = 1
+    return 1;
 }
