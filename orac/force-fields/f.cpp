@@ -1,5 +1,7 @@
 #include <bits/stdc++.h>
-#define int long long
+#pragma GCC optimize("O3")
+#pragma GCC optimization("Ofast,unroll-loops")
+#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 using namespace std;
 // BEGIN DEBUG
 #define __t template
@@ -21,43 +23,21 @@ _fs(os,fmt,args...);
 
 using namespace std;
 struct segtree {
-    vector<vector<int>>T;
-    segtree(int N):T(N*4){}
-    void merge(int v){ 
-        int i=0,j=0;auto&a=T[v*2],&b=T[v*2+1];
-        T[v].clear();T[v].reserve(a.size()+b.size());
-        while(i<a.size()&&j<b.size()){
-            if(a[i]>b[j]){
-                T[v].push_back(b[j++]);
-            }else{
-                T[v].push_back(a[i++]);
-            }
-        }
-        while(i<a.size())T[v].push_back(a[i++]);
-        while(j<b.size())T[v].push_back(b[j++]);
+    vector<int>T;int N;
+    segtree(int N):T(N+1),N(N){}
+    void add(int i,int addend){
+        for(;i<=N;i+=i&-i)T[i]+=addend;
     }
-    void build(int v,int tl,int tr,vector<vector<int>>&A){ 
-        if(tl==tr){
-            T[v]=A[tl];
-            sort(T[v].begin(),T[v].end());
-            return;
-        }
-        int tm=(tl+tr)/2;
-        build(v*2,tl,tm,A);
-        build(v*2+1,tm+1,tr,A);
-        merge(v);
+    int sum(int i){
+        int sum=0;for(;i;i-=i&-i)sum+=T[i];
+        return sum;
     }
-    int query(int v,int tl,int tr,int ql,int qr,int gte) {
-        if(ql<=tl&&tr<=qr){
-            return T[v].end()-lower_bound(T[v].begin(),T[v].end(),gte);
-        }
-        int tm=(tl+tr)/2,cnt=0;
-        if(ql<=tm)cnt+=query(v*2,tl,tm,ql,qr,gte);
-        if(qr >tm)cnt+=query(v*2+1,tm+1,tr,ql,qr,gte);
-        return cnt;
+    int sum(int l,int r){
+        return sum(r)-sum(l-1);
     }
 };
 signed main() {
+    cin.tie(0)->sync_with_stdio(false),cout.tie(0);
     int N,K;cin>>N>>K;
     using pii=pair<int,int>;
     vector<pii>rects(N+1);set<int>coord;
@@ -69,47 +49,50 @@ signed main() {
     vector<vector<int>>A(2*N+1);
     for(int i=1;i<=N;i++)rects[i]={ptc[rects[i].first],ptc[rects[i].second]};
     for(int i=1;i<=N;i++)A[rects[i].first].push_back(rects[i].second);
-    segtree st(N*2+1);
-    st.build(1,1,2*N,A);
-    int ans=0;
+    sort(rects.begin()+1,rects.end());
+    segtree st(N*2);
+    for(int i=1;i<=N;i++)st.add(rects[i].second,1);
+    long long ans=0;
+    int y=2*N;
     for(int i=1;i<=N;i++){
         int x=rects[i].first;
-        int lo=1,hi=2*N;
-        while(lo+1<hi){
-            int mid=(lo+hi)/2;
-            if(st.query(1,1,2*N,x,2*N,mid)>=K) lo=mid; else hi=mid;
-            // dprint("mid = {} = {}\n",mid,st.query(1,1,2*N,x,2*N,mid));
+        while(y>=1&&st.sum(y,2*N)<K)y--;
+        if(y>=1&&st.sum(y,2*N)>=K){
+            assert(ctp.find(y)!=ctp.end());
+            ans=max(ans,(long long)ctp[x]*(long long)ctp[y]);
         }
-        if(st.query(1,1,2*N,x,2*N,lo)>=K){
-            ans=max(ans,ctp[x]*ctp[lo]);
-        }
+        st.add(rects[i].second,-1);
     }
     cout<<ans<<endl;
 }
 
 // begin signature
 // +----------------------------------------+
-// |ミミミ丁ビ火せ火ㇸㇵヘヘㇵ　シシミ丁ビせ|
-// |・・ㇸ一ヘ一ミ火山允允允山火シ・ㇸ一ヘミ|
-// |ㇵㇵ一ㇵビ山汎汎汎汎汎洪労允ビヘ一　ㇸヘ|
-// |ビ丁ミ山允山火ビ火せ山山允せビシヘヘ・ㇸ|
-// |汎允山山ビミ丁ミミミミ丁ビビビ丁シㇵ・ㇸ|
-// |和労允せ丁シㇵ一・・・ㇸ一ヘミ丁火ビシ一|
-// |和洪山ビシ一　ㇸ一ㇵㇵㇵ一・・一ㇵヘ丁ミ|
-// |李汎火ミ一　ㇵㇵㇵヘシミ丁ミヘ一ㇸ　・ㇵ|
-// |汎せミ一・　　　　　・ㇸ一ㇵシ丁ミシ一　|
-// |せミㇸㇸㇵㇸ・丁ミシヘㇵㇵㇵヘㇵミビシ一|
-// |シ・　ㇸㇵ丁シ一・　・ㇸ・　　ㇸヘシシㇵ|
-// |シヘ　ビシ一　一ヘシミミミシㇵㇸ・　ㇵㇵ|
-// |シㇸ火シㇸ・ヘミビせ山山せ火ビミㇵ　　ミ|
-// |ヘㇸ丁ㇵ　ㇵ丁火允汎労労労洪汎山ビシㇸ　|
-// |ヘ・ミㇵ　ヘビ山洪李耗奏和洪山火丁ミシㇵ|
-// |ミ・ㇵ一・シ火汎李奏陽奏李允火ミㇵㇸ・・|
-// |ミ・ㇵ・ㇵビ允李奏義群和汎火ミ一・一ヘㇵ|
-// |シ　ㇸ一丁允李奏義陽和汎火シ・一ミビ火丁|
-// |ㇵ・ㇸ丁山労奏慶義耗洪せシ　ㇵビ山允火シ|
-// |ヘ　ヘ火汎和陽覇群李允丁一ㇸ丁山山ビヘ　|
+// |ビビビ火せ山せ火火・ㇸㇸ　ミミミミ丁火せ|
+// |一ㇵㇵヘミミヘ丁火せ山山せ丁ㇵ・ㇸㇵシ丁|
+// |ㇸㇸ　ㇸミせ允汎洪洪洪労労山丁ㇵㇸ　ㇸヘ|
+// |ミミシせ允允せせ火せ山允允山ビミシㇵ・ㇸ|
+// |山せ火允火丁丁火せせせ山ビ丁ミシヘㇸ・・|
+// |労労洪允せ丁ビ丁ミミミミ丁火ビせ火丁ヘㇸ|
+// |奏和洪山火ミヘ一ㇸ・・・ㇸㇵシ丁ビ火ビミ|
+// |和洪允火ミㇵ・・・・一一ㇵㇸ　ㇸ一ヘシビ|
+// |洪山火ミ一　一一ㇸㇸ一一一ㇸ・一ㇸ　・ㇵ|
+// |せビヘ・一・　・・・・ㇸ一ㇵヘ一ㇵヘㇸ・|
+// |丁ㇵ・　一一一一・　・ㇸㇸ・　ㇸ一一一　|
+// |丁シ　　　　　一ヘシミミミシㇵㇸ　ㇸㇸ　|
+// |シ　　ㇵ　ㇸヘ丁火せ山山せ火ビミㇵ　・シ|
+// |ㇵ　ㇸ・　ㇵ丁せ允汎労労労洪汎山ビシㇸ・|
+// |ヘ　一　　ヘビ山洪李耗奏和洪山火丁ミシㇵ|
+// |ミ・一　・シ火汎李奏陽奏李允火ミㇵㇸ　・|
+// |シ・ㇸ・ㇵビ允李奏義群和汎火シㇸ・ㇵヘㇵ|
+// |ㇵ一ㇸ一丁允李奏慶陽和汎火シ・一ミビ火丁|
+// |ヘ・ㇸ丁山労奏慶義耗洪せシ　ㇵビ山汎山丁|
+// |ㇸ　ヘ火汎和陽覇群李允丁一ㇸ丁山允せ丁ㇵ|
 // +----------------------------------------+
-// 2026 (April 21st) 18:20:24
+// 2026 (April 22nd) 20:31:09
 // end signature
+
+
+
+
 
