@@ -14,6 +14,6 @@ __t<class T>struct is_iterable{__t<class U>static auto test(int) ->decltype( beg
 _fs(os,fmt,args...);
 #endif // DEBUG
 }__t <__T... Args>void println(_OS &os,const _S &fmt,const Args &...args){print(os,fmt,args...);os << '\n';}__t <__T... Args>void print(const _S &fmt,const Args &...args){print(cerr,fmt,args...);}__t <__T... Args>void println(const _S &fmt,const Args &...args){println(cerr,fmt,args...);}}
-#define dprint(...) dbg::print(__VA_ARGS__)
-#define dtprint(...) dbg::print("[{}]{}:{}: ",__PRETTY_FUNCTION__,__FILE__,__LINE__),dbg::print(__VA_ARGS__),dbg::print("\n")
+#define dprint(...) dbg::println(__VA_ARGS__)
+#define dcheck(v) dbg::println("{} = {}", #v, v)
 // END DEBUG
