@@ -1,27 +1,89 @@
 #include <bits/stdc++.h>
 using namespace std;
-using pii=array<int,3>;
-struct segtree{
-    vector<pii>T;
-    segtree(int N):T(N*4,{-1,-1,1}){}
-    void update(int v,int tl,int tr,int ql,int qr,pii chmax){
-        if(ql<=tl&&tr<=qr){
-            T[v]=max(T[v],chmax);
-            return;
-        }
-        int tm=(tl+tr)/2;
-        T[v*2]=max(T[v*2],T[v]);
-        T[v*2+1]=max(T[v*2+1],T[v]);
-        if(ql<=tm)update(v*2,tl,tm,ql,qr,chmax);
-        if(qr >tm)update(v*2+1,tm+1,tr,ql,qr,chmax);
+struct order {
+    int d,t,c;
+    bool operator<(const order&o) const {
+        return tie(d,t,c)<tie(o.d,o.t,o.c);
     }
-    pii query(int v,int tl,int tr,int pos){
-        if(tl==tr)return T[v];
-        int tm=(tl+tr)/2;
-        return max(T[v],pos<=tm?query(v*2,tl,tm,pos):query(v*2+1,tm+1,tr,pos));
+    bool operator>(const order&o) const {
+        return tie(d,t,c)>tie(o.d,o.t,o.c);
     }
 };
-int main() {
+const int INF=1e9;
+const int MOD=1e9+7;
+// struct segtree{
+//     vector<vector<order>>T;
+//     segtree(int N):T(N*4){}
+//     void push(vector<order>&s,order x){
+//         while(!s.empty()&&x.d>=s.back().d){
+//             s.pop_back();
+//         }
+//         s.push_back(x);
+//     }
+//     void update(int v,int tl,int tr,int ql,int qr,order x){
+//         if(ql<=tl&&tr<=qr){
+//             push(T[v],x);
+//             return;
+//         }
+//         int tm=(tl+tr)/2;
+//         if(ql<=tm)update(v*2,tl,tm,ql,qr,x);
+//         if(qr >tm)update(v*2+1,tm+1,tr,ql,qr,x);
+//     }
+//
+//     order query(int v,int tl,int tr,int pos,int d){
+//         auto it=lower_bound(T[v].rbegin(),T[v].rend(),order{d,-INF,-INF});
+//         order val=it==T[v].rend()?order{-1,-1,1}:*it;
+//         if(tl==tr)return val;
+//         int tm=(tl+tr)/2;
+//         auto merge=pos<=tm?query(v*2,tl,tm,pos,d):query(v*2+1,tm+1,tr,pos,d);
+//         if(tie(merge.t,merge.d)>tie(val.t,val.d))val=merge;
+//         return val;
+//     }
+// };
+//
+// CHATGPT wrote this iterative segtree
+// MLE is so fake
+// orig is above
+struct segtree{
+    int n;
+    vector<vector<order>>T;
+
+    segtree(int N):n(N),T(2*N+2){}
+
+    void push(vector<order>&s,order x){
+        while(!s.empty()&&x.d>=s.back().d){
+            s.pop_back();
+        }
+        s.push_back(x);
+    }
+
+    void update(int l,int r,order x){
+        for(l+=n-1,r+=n-1;l<=r;l>>=1,r>>=1){
+            if(l&1)push(T[l++],x);
+            if(!(r&1))push(T[r--],x);
+        }
+    }
+
+    order get(vector<order>&s,int d){
+        auto it=lower_bound(s.rbegin(),s.rend(),order{d,-INF,-INF});
+        return it==s.rend()?order{-1,-1,1}:*it;
+    }
+
+    order query(int pos,int d){
+        pos+=n-1;
+        order val={-1,-1,1};
+
+        while(pos){
+            auto cur=get(T[pos],d);
+            if(tie(cur.t,cur.d)>tie(val.t,val.d))val=cur;
+            pos>>=1;
+        }
+
+        return val;
+    }
+};
+int main(){
+    cin.tie(nullptr)->sync_with_stdio(false);
     int N,C,Q;cin>>N>>C>>Q;
     vector<vector<int>>g(N+1);
     for(int i=2;i<=N;i++){
@@ -29,58 +91,58 @@ int main() {
         g[i].push_back(u);
         g[u].push_back(i);
     }
-    int time=1;
+    int timer=1;
     vector<int>in(N+1),out(N+1),depth(N+1);
     function<void(int,int)>dfs=[&](int u,int p){
-        in[u]=time++;
-        for(auto v:g[u]){
+        in[u]=timer++;
+        for(int v:g[u]){
             if(v==p)continue;
             depth[v]=depth[u]+1;
             dfs(v,u);
         }
-        out[u]=time;
+        out[u]=timer-1;
     };
-    depth[1]=0;dfs(1,-1);
-    segtree st(time+1);
+    dfs(1,-1);
+    segtree st(N+2);
     int ans=0;
     for(int q=1;q<=Q;q++){
-        // printf("qurie %d\n",q);
-        int u,d,c;cin>>u>>d>>c;
+        int u,d,c;
+        cin>>u>>d>>c;
         if(c==0){
-            auto [d,_,c]=st.query(1,1,time,u);
-            if(d==-1||d>=depth[u])ans+=q*c;
-            ans%=(int)1e9+7;
-            // cout<<d<<" "<<depth[u]<<endl;
+            set<order>l;
+            int col=st.query(in[u],depth[u]).c;
+            ans=(ans+(long long)q*col)%MOD;
         }else{
-            st.update(1,1,time,in[u],out[u],{depth[u]+d,q,c});
+            st.update(in[u],out[u],{depth[u]+d,q,c});
         }
     }
-    cout<<ans<<endl;
+    cout<<ans<<"\n";
 }
 
 // begin signature
 // +----------------------------------------+
-// |陽奏和労汎山せ火火火せ山汎洪李奏陽義慶覇|
-// |和労允せビミシヘヘシミ丁火允洪和耗奏群群|
-// |汎せ丁ヘ一ㇸヘミ丁ビ丁丁丁せ允汎洪李李李|
-// |ビシㇸㇸヘ丁火山山せ火ビビビ火せ山允允允|
-// |ヘ・ㇸ一ㇵヘミ丁丁シヘㇵㇵㇵヘシ丁丁丁丁|
-// |　・ㇸㇸㇸ　・一一ㇸ　・ㇸㇸ・　ㇸㇵ一一|
-// |ㇵシミミ丁ミヘ一ㇸㇸ・　　・　　ㇸㇸㇸ一|
-// |ㇵ一ㇸㇸㇸ一ヘㇸ　・　　　ㇸ・・一一ㇵヘ|
-// |・・一ㇵ一ㇸ　　　　・・・　・ㇸ一一ㇸ　|
-// |　・ミビ丁ミヘㇸ・ㇵ　ㇸㇸ一ㇵヘヘ丁ミヘ|
-// |　ヘ火允ビㇵ　ㇵ・・一一一ㇸ　・一シビ丁|
-// |・シせ丁ㇵ　ヘㇵシミ丁丁丁ミヘ一　一シ火|
-// |　ヘビヘ・一シ丁火山允允山せ火丁ヘ・ㇸシ|
-// |・・シ一　ヘ丁せ汎洪労李李労汎山火ミ一・|
-// |ミㇸ　一・シ火允労和奏奏李汎山ビミシヘヘ|
-// |せミ一　ㇸミせ汎和奏陽耗労允ビシ一・　　|
-// |汎火シ　ヘビ允李奏義群和汎火シㇸㇸㇵシヘ|
-// |山ミㇸㇵビ允李奏慶陽和汎火シ　ㇵ丁火火ビ|
-// |丁一ㇸ丁山労奏慶義耗洪火シ　ヘビ丁丁山火|
-// |シ　ヘ火汎和陽覇群李允丁一ㇸ一ヘビ山汎火|
+// |覇陽奏李洪汎允山せ山山允山山允汎洪李耗群|
+// |群和洪山火丁ミシシミ丁ミミミ丁ビせ允洪和|
+// |洪山ビシ一一シミヘ一・　　・一ヘ丁火允労|
+// |火シㇸㇸシミㇵ　ㇸㇵㇵヘヘㇵㇸ　ㇵミせ汎|
+// |シ・ㇸミミㇸㇸヘシヘㇵㇵヘミ丁ヘ・一ミせ|
+// |ㇵ　ㇵㇵㇵ　ヘㇵ・・ㇸㇸ・　ㇵミミ一・シ|
+// |・・ㇸ一ㇸ・シ・ㇸ・・　ㇸㇸㇸ・ㇵ丁シ　|
+// |ㇵヘㇵㇵㇵヘミヘㇸ　・・・・・　　一丁シ|
+// |　ㇸㇸㇸㇸㇵ・・・ㇸㇸㇸㇸ一一ㇸ・　ヘビ|
+// |　・丁ㇵㇸ一一ㇸ・　・ㇸ　　ㇸヘミ　シ丁|
+// |　ヘシ　ㇵㇸㇸ　ㇵㇵヘヘㇵ一・・ㇵㇸ丁ヘ|
+// |・ミ一ㇵ・・ㇵミビ火火火ビ丁シ一　ㇸ丁一|
+// |　シ一一ㇸシビ山汎洪洪洪汎允せ丁ㇵ一シㇸ|
+// |ㇸ　ヘ　ヘビ山洪李耗奏奏耗李洪允火ミ丁ㇵ|
+// |丁一　　ヘ火汎李奏陽慶陽耗洪山ビミヘビヘ|
+// |允丁ㇵ　シせ洪耗陽慶群耗李汎火シㇸヘビㇵ|
+// |汎ビ一一ビ允和陽覇群和洪山せシㇸヘビヘ　|
+// |火ヘ・丁允李陽覇群李允ビシシシ丁シㇸㇸシ|
+// |シ　シ山李群覇陽李允丁ミミシㇵㇸ・ヘビ山|
+// |ㇵ一ビ汎耗義慶奏洪火ㇵ・　　ㇸヘ丁せ汎せ|
 // +----------------------------------------+
-// 2026 (April 25th) 12:41:35
+// 2026 (April 25th) 15:40:24
 // end signature
+
 
