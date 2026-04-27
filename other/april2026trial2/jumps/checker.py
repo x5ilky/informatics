@@ -2,10 +2,10 @@ import random
 from subprocess import *
 
 for i in range(10000):
-    if i % 100 == 0: print(f"VALID CASE {i+1}")
+    print(f"VALID CASE {i+1}")
     cases = []
     while True:
-        N = random.randint(10, 15)
+        N = random.randint(10, 10000)
         heights = list(range(0,N))
         random.shuffle(heights)
         # heights.insert(0,N)
@@ -16,9 +16,9 @@ for i in range(10000):
         b = False
         u = random.randint(0,N-1);
         v = random.randint(0,N-1);
+        if not u < v: continue
         if u == v: continue
-        (c, d) = sorted([u, v])
-        for i in range(c, d+1):
+        for i in range(u, v+1):
             if heights[i] > heights[v]:
                 b = True
                 break

@@ -2,7 +2,7 @@
 
 #include <bits/stdc++.h>
 using namespace std;
-vector<vector<int>>g,liftb,liftl,liftr;vector<int>H;
+vector<vector<int>>g,liftmx,liftmn,liftl,liftr;vector<int>H;
 int N;
 using pii=pair<int,int>;
 const int INF=1e9+7;
@@ -17,7 +17,7 @@ struct segtree{
         T[v]=max(T[v*2],T[v*2+1]);
     }
     int query(int v,int tl,int tr,int ql,int qr){
-        if(tl==tr)return T[v];
+        if(ql<=tl&&tr<=qr)return T[v];
         int tm=(tl+tr)/2,ans=-INF;
         if(ql<=tm)ans=max(ans,query(v*2,tl,tm,ql,qr));
         if(qr >tm)ans=max(ans,query(v*2+1,tm+1,tr,ql,qr));
@@ -26,77 +26,107 @@ struct segtree{
 };
 
 segtree Hst(1);
-void init(int _N, vector<int> _H) {
+void init(int _N,vector<int> _H){
     N=_N,H=_H;
+    H.resize(N+1);
+    H[N]=INF;
+
     Hst=segtree(N+1);
     for(int i=0;i<N;i++)Hst.update(1,0,N,i,H[i]);
-    H.resize(N+1);
-    g.resize(N+1); 
-    liftb.resize(N+1,vector<int>(19,N)); 
-    liftl.resize(N+1,vector<int>(19,N)); 
-    liftr.resize(N+1,vector<int>(19,N)); 
-    for(int i=0;i<=N;i++)liftl[i][0]=liftr[i][0]=N;
-    H[N]=INF;
+
+    g.assign(N+1,{});
+    liftmx.assign(N+1,vector<int>(19));
+    liftmn.assign(N+1,vector<int>(19));
+    liftl.assign(N+1,vector<int>(19));
+    liftr.assign(N+1,vector<int>(19));
+
+    for(int i=0;i<=N;i++){
+        for(int k=0;k<19;k++){
+            liftmx[i][k]=liftmn[i][k]=liftl[i][k]=liftr[i][k]=i;
+        }
+    }
+
     stack<pii>st;
     st.push({INF,-1});
+
     for(int i=0;i<N;i++){
         while(H[i]>st.top().first){
-            g[st.top().second].push_back(i);
-            liftr[st.top().second][0]=i;
+            int x=st.top().second;
+            g[x].push_back(i);
+            liftr[x][0]=i;
             st.pop();
         }
         st.push({H[i],i});
     }
+
+    while(!st.empty())st.pop();
     st.push({INF,-1});
+
     for(int i=N-1;i>=0;i--){
         while(H[i]>st.top().first){
-            g[st.top().second].push_back(i);
-            liftl[st.top().second][0]=i;
+            int x=st.top().second;
+            g[x].push_back(i);
+            liftl[x][0]=i;
             st.pop();
         }
         st.push({H[i],i});
     }
+
     for(int i=0;i<N;i++){
-        int nxt=i;
-        for(auto e:g[i])if(H[e]>H[nxt])nxt=e;
-        liftb[i][0]=nxt;
+        int mx=i,mn=i;
+        for(auto e:g[i]){
+            if(mx==i||H[e]>H[mx])mx=e;
+            if(mn==i||H[e]<H[mn])mn=e;
+        }
+        liftmx[i][0]=mx;
+        liftmn[i][0]=mn;
     }
+
     for(int k=1;k<19;k++){
-        for(int i=0;i<N;i++){
-            liftb[i][k]=liftb[liftb[i][k-1]][k-1];
+        for(int i=0;i<=N;i++){
+            liftmx[i][k]=liftmx[liftmx[i][k-1]][k-1];
+            liftmn[i][k]=liftmn[liftmn[i][k-1]][k-1];
             liftl[i][k]=liftl[liftl[i][k-1]][k-1];
             liftr[i][k]=liftr[liftr[i][k-1]][k-1];
         }
     }
-    // for(int k=0;k<19;k++){
-    //     for(int i=0;i<N;i++){
-    //         printf("%d ",liftb[i][k]);
-    //     }
-    //     printf("\n");
-    // }
 }
 
-int minimum_jumps(int A, int B, int C, int D) {
-    if(A!=B||C!=D)return -1;
-    int U=A,V=C,steps=0,ch=false;vector<vector<int>>&dir=liftb;
-    // printf("query = %d, hv = %d\n", Hst.query(1,0,N,U,V),H[V]);
-    if(Hst.query(1,0,N,U,V)>H[V])return -1;
-    for(int i=1;i<=3;i++){
+int minimum_jumps(int A,int B,int C,int D){
+    int U=B,steps=0;
+    int mxh=Hst.query(1,0,N,C,D);
+
+    auto fin=[&](){
+        return C<=liftr[U][0]&&liftr[U][0]<=D;
+    };
+
+    auto jump=[&](vector<vector<int>>&dir){
         for(int k=18;k>=0;k--){
-            assert(steps<=N+10);
-            if(dir[U][k]==U)continue;
-            if(H[dir[U][k]]<H[V]){
-                U=dir[U][k];
-                steps+=(1<<k);
+            int v=dir[U][k];
+            if(v==U)continue;
+            if(v<C&&H[v]<mxh){
+                U=v;
+                steps+=1<<k;
             }
         }
-        if(liftl[U][0]==V||liftr[U][0]==V){
-            return ++steps;
+    };
+
+    for(int k=18;k>=0;k--){
+        int v=liftl[U][k];
+        if(v==U)continue;
+        if(v>=A&&v<C&&H[v]<mxh){
+            U=v;
         }
-        if(H[liftb[U][0]]<H[V])dir=liftb;
-        else if(H[liftl[U][0]]<H[V])dir=liftl;
-        else if(H[liftr[U][0]]<H[V])dir=liftr;
-        else return -1;
     }
+
+    if(!(U<C&&H[U]<mxh))return -1;
+    if(fin())return steps+1;
+
+    jump(liftmx);
+    if(fin())return steps+1;
+
+    jump(liftr);
+    if(fin())return steps+1;
+
     return -1;
 }
