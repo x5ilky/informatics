@@ -31,3 +31,7 @@ signed main() {
         cout<<solve(CA,psCA,b,a)<<" "<<solve(CB,psCB,a,b)<<"\n";
     }
 }
+
+// ad-hoc
+// no signature
+// may 6th 9:18am
