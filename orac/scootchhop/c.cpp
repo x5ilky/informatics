@@ -17,7 +17,6 @@ void p1(){
     cout<<dp[R][C]<<endl;
 }
 void p2(){
-
 }
 signed main() {
     cin>>R>>C;A.resize(R+1,vector<int>(C+1,0));for(int i=1;i<=R;i++)for(int j=1;j<=C;j++)cin>>A[i][j];
