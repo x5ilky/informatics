@@ -28,6 +28,45 @@ int main() {
         g[v].push_back({u,w});
         edges[i]={u,v,w};
     }
+    auto cnt=[&](vector<int>&p,int lt,int gt){
+        int u=p[0],cnt=0;
+        for(int i=1;i<p.size();i++){
+            for(auto [v,w]:g[u]){
+                if(v==p[i]){
+                    u=v;
+                    cnt+=w<=lt||w>=gt;
+                }
+            }
+        }
+        return cnt;
+    };
+    auto path=[&](int s,int t,int want,DSU&dsu,vector<int>&p,int lt=2e9,int gt=-2e9){
+        vector<int>back(2*N+1,-1);
+        queue<int>q;q.push(s);back[s]=s;
+ 
+        while(!q.empty()){
+            auto u=q.front();q.pop();
+            for(auto [v,w]:g[u>N?u-N:u]){
+                if(!(w<=lt||w>=gt))continue;
+                int flipped=(u>N?v:v+N);
+                if(dsu.head(flipped)!=dsu.head(s))continue;
+                if(back[flipped]==-1){
+                    back[flipped]=u;
+                    q.push(flipped);
+                }
+            }
+        }
+        int i=t+want*N;
+        if(back[i]==-1)return false;
+        vector<int>l;
+        while(i!=s){
+            l.push_back(i>N?i-N:i);
+            i=back[i];
+        }
+        l.push_back(s);
+        for(int i=(int)l.size()-1;i>=0;i--)p.push_back(l[i]);
+        return true;
+    };
     {
         // odd case
         // possible iff there exists an edge with weight K in component of 1 and N
@@ -37,43 +76,18 @@ int main() {
             odd.join(u,v+N);
             odd.join(u+N,v);
         }
-        auto path=[&](int s,int t,int want,DSU&dsu,vector<int>&p){
-            vector<int>back(2*N+1,-1);
-            queue<int>q;q.push(s);back[s]=s;
-
-            while(!q.empty()){
-                auto u=q.front();q.pop();
-                for(auto [v,_]:g[u>N?u-N:u]){
-                    int flipped=(u>N?v:v+N);
-                    if(dsu.head(flipped)!=dsu.head(s))continue;
-                    if(back[flipped]==-1){
-                        back[flipped]=u;
-                        q.push(flipped);
-                    }
-                }
-            }
-            int i=t+want*N;
-            if(back[i]==-1)return false;
-            vector<int>l;
-            while(i!=s){
-                l.push_back(i>N?i-N:i);
-                i=back[i];
-            }
-            l.push_back(s);
-            for(int i=(int)l.size()-1;i>=0;i--)p.push_back(l[i]);
-            return true;
-        };
+        
         auto construct=[&](int i){
             vector<int>p;
             auto [u,v,w]=edges[i];
-            if(!path(1,u,1,odd,p))return;
+            assert(path(1,u,0,odd,p));
             for(int j=1;j<=2*N;j++){
                 p.push_back(v);
                 p.push_back(u);
             }
             p.push_back(v);
-            if(!path(u,N,1,odd,p))return;
-            assert(p.size()%2==1);
+            assert(path(u,N,1,odd,p));
+            assert(p.size()%2==0);
             cout<<p.size()<<endl;
             for(auto v:p)cout<<v<<" ";
         };
@@ -117,27 +131,53 @@ int main() {
                 if(edges[i][2]-K==P)bi.push_back(i);
                 i++;
             }
-            bool small=false,big=false;
+            pii small={0,0},big={0,0};
             if(even.head(1)==even.head(N)){
                 for(auto i:si){
                     auto [u,v,w]=edges[i];
                     // printf("si = %d, %d %d %d\n",i,u,v,w);
-                    if(even.head(u)==even.head(1)||even.head(v)==even.head(1)){
-                        small=true;
-                        break;
-                    }
+                    if(even.head(u)==even.head(1)){small={u,v};break;};
+                    if(even.head(v)==even.head(1)){small={v,u};break;};
                 }
                 for(auto i:bi){
                     auto [u,v,w]=edges[i];
                     // printf("bi = %d, %d %d %d\n",i,u,v,w);
-                    if(even.head(u)==even.head(1)||even.head(v)==even.head(1)){
-                        big=true;
-                        break;
-                    }
+                    if(even.head(u)==even.head(1)){big={u,v};break;};
+                    if(even.head(v)==even.head(1)){big={v,u};break;};
                 }
-                // printf("small = %d, big = %d\n",small,big);
-                if(small&&big){
+                //printf("small = %d,%d, big = %d,%d\n",small.first,small.second,big.first,big.second);
+                if(small.first&&big.first){
                     cout<<"YES\n";
+                    vector<int>a,b,c;
+                    path(1,small.first,0,even,a,K-P,K+P);
+                    path(small.first,big.first,0,even,b,K-P,K+P);
+                    path(big.first,N,0,even,c,K-P,K+P);
+ 
+                    int sc=0,bc=0;
+                    sc+=cnt(a,K-P,2e9);
+                    sc+=cnt(b,K-P,2e9);
+                    sc+=cnt(c,K-P,2e9);
+                    bc+=cnt(a,-2e9,K+P);
+                    bc+=cnt(b,-2e9,K+P);
+                    bc+=cnt(c,-2e9,K+P);
+                    int tot=max({sc,bc,2*N});
+                    vector<int>p;
+                    for(auto v:a)p.push_back(v);
+                    for(int i=1;i<=(tot-sc)/2;i++){
+                        p.push_back(small.second);
+                        p.push_back(small.first);
+                    }
+                    p.push_back(small.second);
+                    for(auto v:b)p.push_back(v);
+                    for(int i=1;i<=(tot-bc)/2;i++){
+                        p.push_back(big.second);
+                        p.push_back(big.first);
+                    }
+                    p.push_back(big.second);
+                    for(auto v:c)p.push_back(v);
+                    assert(p.size()%2==1);
+                    cout<<p.size()<<endl;
+                    for(auto v:p)cout<<v<<" ";
                     return 0;
                 }
             }
@@ -145,7 +185,7 @@ int main() {
     }
     cout<<"NO\n";
 }
-
+ 
 // begin signature
 // +----------------------------------------+
 // |和労汎山せ火ビ丁丁丁ビ火せせ山允汎労李耗|
@@ -171,5 +211,3 @@ int main() {
 // +----------------------------------------+
 // 2026 (May 18th) 21:44:46
 // end signature
-
-
