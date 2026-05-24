@@ -25,9 +25,9 @@ std::vector<std::pair<int, int>> p;
 int query_count = 0;
 int answer_count = 0;
 
-void wronganswer(int code) {
-  printf("Wrong Answer [%d]\n", code);
-  exit(0);
+#define wronganswer(code) if(true) { \
+  printf("Wrong Answer [%s]\n", #code); \
+  exit(0);\
 }
 
 void dfs(int now, int pre, std::vector<std::vector<int>> &g,
