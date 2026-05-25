@@ -11,4 +11,6 @@ signed main(){
         int x,y;cin>>x>>y;
         loc.push_back({x,y});
     }
+
+    
 }
