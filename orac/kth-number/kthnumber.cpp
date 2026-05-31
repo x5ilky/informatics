@@ -1,8 +1,94 @@
 #include "kthnumber.h"
-#include <algorithm>
 #include <bits/stdc++.h>
-#include <new>
 using namespace std;
+int subtask3(int N, int M) {
+    if(M<=(N+1)/2){
+        map<int,int>freq;
+        for(int i=0;i<M+1;i++){
+            vector<int>q;
+            for(int j=0;j<M+1;j++){
+                if(j!=i)q.push_back(j);
+            }
+            freq[ask_host(q)]++;
+        }
+        return freq.rbegin()->second;
+    } else {
+        map<int,int>freq;
+        int cnt=0;
+        for (int i=M-1;i<N;i++){
+            vector<int>q;
+            for(int j=0;j<=M-2;j++){
+                q.push_back(j);
+            }
+            q.push_back(i);
+            freq[ask_host(q)]++;
+            cnt++;
+        }
+        if (freq.size()>1){
+            auto [big,bigcnt]=*freq.rbegin();
+            int less_than=(N-M+1)-bigcnt;
+            return big-less_than;
+        }
+        // well either its all < or all >
+
+        int c=freq.begin()->first;
+        for (int i=0;cnt<(N+1)/2+1;i++) {
+            vector<int>q;
+            for (int j=0;j<=M-2;j++) {
+                if (j!=i) q.push_back(j);
+            }
+            q.push_back(M-1);
+            q.push_back(M);
+            int v=ask_host(q);
+            if (v>c) return c;
+            if (v<c) return c-(N-M);
+            cnt++;
+        }
+        if(c<=N/2)return c;
+        return c-(N-M);
+    }
+}
+
+int find_K(int N, int M, int subtask) {
+    // if (subtask == 1) return subtask1(N);
+    // if (subtask == 2) return subtask2(N, M);
+    /* if (subtask == 3) */ 
+    return subtask3(N, M);
+    return 1;
+}
+
+// begin signature
+// +----------------------------------------+
+// |覇覇陽奏和労ㇵビ山允允山火丁ㇵ　耗奏陽義|
+// |義奏李汎ヘ山労和耗耗李労允せ丁ヘ・労李耗|
+// |李汎一せ和奏和労汎允せビ丁ミミヘ一せ允労|
+// |せヘせ李和洪山ビミシㇵ・　　　・ㇸ　ビ允|
+// |ㇸシ火山允一ㇵㇵ　ㇸ一ㇸ　ㇸシヘㇸ　　丁|
+// |　・一　ㇵミㇵ・ヘ一ㇸ一ヘヘ・一丁ミㇸ　|
+// |・・ㇵ一ㇵヘㇸ一・ㇸヘヘㇵ　ㇵヘ　シビ一|
+// |・・一一ㇸ・一ㇵㇸミ火せせ丁ㇵㇸミ　シ山|
+// |　ㇸ・一ヘミ・　シ山洪洪允せ丁ㇸㇵ一ㇵ火|
+// |　ㇸヘㇵ　　ㇸヘ山汎せビ丁ミシ・シ・シ山|
+// |・シㇸㇵヘ一一火火ミㇵ・　　　ㇸヘ一ミせ|
+// |・シせ丁　ㇸヘシㇸ・ㇵシ丁丁丁シㇵ　一ミ|
+// |シ洪汎丁　一ㇸ　ㇵ丁火山汎汎汎山火ミ一・|
+// |シ群李せㇵ一一ㇸミせ汎李耗耗李汎允山火シ|
+// |・労群洪火一一一ビ允李奏群李汎火丁シシシ|
+// |丁ミ李耗允丁・ㇵ火洪耗義奏洪せミ一　ㇸ・|
+// |洪允火労洪火ㇵミ允和陽陽李山ミ・ㇵミヘ丁|
+// |耗洪ミ允汎火シ山李陽義和山ミ　シせシミ允|
+// |奏李ㇵ火せビせ労陽慶耗允ミ　ミ允火一火汎|
+// |義耗允一シミ允耗慶陽労せㇵ一火允ミシ山山|
+// +----------------------------------------+
+// 2026 (May 31st) 16:37:21
+// end signature
+
+
+
+
+
+/*
+
 int subtask1(int N) {
     vector<int> v;
     v.push_back(ask_host({0, 1}));
@@ -40,79 +126,5 @@ int subtask2(int N, int M) {
     return suspect-1;
     assert(false);
 }
-int subtask3(int N, int M) {
-    if(M<=(N+1)/2){
-        map<int,int>freq;
-        for(int i=0;i<M+1;i++){
-            vector<int>q;
-            for(int j=0;j<M+1;j++){
-                if(j!=i)q.push_back(j);
-            }
-            freq[ask_host(q)]++;
-        }
-        return freq.rbegin()->second;
-    } else {
-        map<int,int>freq;
-        for (int i=M-1;i<N;i++){
-            vector<int>q;
-            for(int j=0;j<=M-2;j++){
-                q.push_back(j);
-            }
-            q.push_back(i);
-            freq[ask_host(q)]++;
-        }
-        if (freq.size()>1){
-            auto [big,bigcnt]=*freq.rbegin();
-            int less_than=(N-M+1)-bigcnt;
-            return big-less_than;
-        }
-        int c=freq.begin()->first;
-        // well either its all < or all >
-        vector<int>q;
-        for (int i=M-1;i<N;i++){
-            q.push_back(i);
-        }
-        int s=M-q.size();
-        for(int i=0;i<s;i++)q.push_back(i);
-        int z=ask_host(q);
-        if(z<c)return c-(N-M);
-        return c;
-    }
-}
 
-int find_K(int N, int M, int subtask) {
-    if (subtask == 1) return subtask1(N);
-    if (subtask == 2) return subtask2(N, M);
-    if (subtask == 3) return subtask3(N, M);
-    return 1;
-}
-
-// begin signature
-// +----------------------------------------+
-// |覇覇覇義奏和労洪　一ㇵ一・労労労労和耗群|
-// |覇義奏労允ㇸビせ山せ火丁シㇵㇸ　火山汎李|
-// |奏労山ヘ允李李労山ビシ一・　　　一シビ允|
-// |允　允耗群和允ビミシヘ一・丁ミ一　　ヘビ|
-// |丁汎陽義和允汎允汎允せビシㇸ　ミシ・ㇸ一|
-// |ヘ耗覇陽労和和耗李労汎山ビミヘㇸ　ㇵ一シ|
-// |ㇵ耗覇陽群奏労せシヘヘミビ火せ火ビシ一ㇸ|
-// |一奏覇義慶耗汎丁ㇸ一丁山洪労李李労汎せミ|
-// |火義覇覇群労火一一ビ汎和群陽群和洪允山山|
-// |奏覇覇陽労火火山山労群慶義耗汎火ミヘㇵヘ|
-// |覇覇陽労汎李李洪和群陽陽労せミㇵシ一ㇵ・|
-// |覇義和耗群和汎洪汎洪耗労火ㇵヘシㇸ・一一|
-// |覇覇慶義耗汎允丁ミビ汎汎ミ　　丁・　ㇵ・|
-// |覇覇覇義李山山シシせ汎洪ビ　ㇸシヘ一ㇸミ|
-// |義覇覇覇奏允ミ火丁允李せ允シヘヘシ一シ　|
-// |耗覇覇覇義李火せ火労奏汎労火ㇸミ一ヘㇵ一|
-// |洪慶覇覇奏汎丁ビ洪耗奏労和山ヘ　ミㇸシシ|
-// |奏覇覇義奏洪ビ允耗義奏義和允ミミㇸシㇵ丁|
-// |覇覇義奏奏洪山耗慶奏慶義耗汎ビヘㇸ・一ヘ|
-// |覇陽慶和李李洪群義李奏陽群李汎せ火ビ火シ|
-// +----------------------------------------+
-// 2026 (April 4th) 17:22:47
-// end signature
-
-
-
-
+*/
