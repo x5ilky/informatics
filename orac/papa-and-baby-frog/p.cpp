@@ -75,8 +75,9 @@ int main() {
     int N,K;cin>>N>>K;
     vector<int>A(N+1);
     for(int i=1;i<=N;i++)cin>>A[i];
+    const int SEN=N+1;
     vector<vector<int>>up(N+1),down(N+1);
-    vector<vector<int>>par(N+1,vector<int>(18));
+    vector<vector<int>>par(N+2,vector<int>(18,SEN));
     using pii=pair<int,int>;
     {
         set<pii>byval,byidx;
