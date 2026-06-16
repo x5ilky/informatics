@@ -59,19 +59,44 @@ vector<int> createFunTour(int N, int Q) {
             else trees[2].push_back(i);
         }
         for(auto&t:trees)sort(t.begin(),t.end(),[&](int u,int v){return d[u]<d[v];});
-        priority_queue<pii>pq;for(auto i:{0,1,2})pq.push({trees[i].size(),i});
-        while(!pq.empty()){
-            auto [sz,i]=pq.top();pq.pop(); 
-            if(sz==0)continue;
-            auto [sz2,i2]=pq.top();pq.pop(); 
-            if(sz2==0)continue;
-            cons.push_back(trees[i].back());trees[i].pop_back();
-            cons.push_back(trees[i2].back());trees[i2].pop_back();
-            pq.push({trees[i].size(),i});
-            pq.push({trees[i2].size(),i2});
-        }
-        if(trees[0].size()+trees[1].size()+trees[2].size()==1){
-            for(int i:{0,1,2})if(trees[i].size()==1)cons.push_back(trees[i][0]);
+        using pii=pair<int,int>;
+        auto piles=[&](){
+            array<pii,3>P={pii{trees[0].size(),0},{trees[1].size(),1},{trees[2].size(),2}};
+            sort(P.begin(),P.end());
+            return P;
+        };
+        int p=-1;
+        while(trees[0].size()+trees[1].size()+trees[2].size()){
+            auto P=piles();
+            if(P[0].first+P[1].first<=P[2].first){
+                int N=P[2].first;
+                vector<int>P1,P2;
+                for(auto v:trees[P[0].second])P1.push_back(v);
+                for(auto v:trees[P[1].second])P1.push_back(v);
+                for(auto v:trees[P[2].second])P2.push_back(v);
+                sort(P1.begin(),P1.end(),[&](int u,int v){return d[u]<d[v];});
+                sort(P2.begin(),P2.end(),[&](int u,int v){return d[u]<d[v];});
+                if(p!=P[2].second)swap(P1,P2);
+                for(int i=1;i<=N;i++){
+                    cons.push_back(P1.back());
+                    cons.push_back(P2.back());
+                    P1.pop_back();
+                    P2.pop_back();
+                }
+                break;
+            }
+            int mx=-1,i=-1;
+            for(int k=0;k<=2;k++){
+                if(k==p)continue;
+                if(trees[k].empty())continue;
+                if(d[trees[k].back()]>mx){
+                    mx=d[trees[k].back()];
+                    i=k;
+                }
+            }
+            p=i;
+            cons.push_back(trees[i].back());
+            trees[i].pop_back();
         }
         cons.push_back(centr);
     }else assert(false);
@@ -81,26 +106,27 @@ vector<int> createFunTour(int N, int Q) {
 
 // begin signature
 // +----------------------------------------+
-// |覇覇陽奏李労汎允允允山火丁ミシシミシヘㇵ|
-// |義奏李汎山ビ丁ミミ丁ヘㇸ　・・・　ㇸ一ㇵ|
-// |李汎火ミㇵ一シ　・ㇸ一シ丁丁丁ミ丁ビ火火|
-// |せミ一ㇸ　ㇸ一一ㇵ丁せ允汎汎汎允汎洪労労|
-// |ミ・一・・　　ヘビ允労和耗和洪允山せ火山|
-// |ヘ・・　一ヘ・ミ山労耗陽耗洪山ビミシシ丁|
-// |ヘ・　　丁シ・ミ允李群陽和允ビシ・ミㇸ　|
-// |シ・　ㇵ丁シ　ミ允和陽陽李山ミ・ミ・丁一|
-// |　ㇵミヘシヘㇸビ洪奏覇奏洪火ㇵㇸㇵㇵ一ヘ|
-// |ミせシㇵ丁・シ山和義陽李山ヘㇸ・シㇸㇸ　|
-// |汎丁一　・ㇵ火労群慶耗允ミ　ㇵㇸヘ一ㇵ・|
-// |せミヘシㇵシ山和義陽李せヘ一一ミ・ㇵミ一|
-// |せミせ山丁ヘせ労群義和允火火ビ丁シ一・ヘ|
-// |ミビビ汎山シシ山李群陽和洪労洪洪允火ミㇸ|
-// |・ㇸㇵミビシ　ヘせ洪耗義耗耗労允せビビビ|
-// |一シㇸㇵㇸ・　・丁山李奏群奏労允火丁ミ丁|
-// |ㇸせシ・・シ　ヘせ労奏義和労李李洪允山せ|
-// |一丁一　　・ヘせ労群義和允せ山せせ允汎洪|
-// |ヘ　シ丁シㇵ火労群慶耗汎丁ヘヘㇵミ丁ビビ|
-// |・シ山汎ビミ允和慶陽労せㇵㇸㇸㇸ　・ㇸㇸ|
+// |覇覇陽奏李労ㇸシ丁丁ミシヘ一　シミシㇵ一|
+// |義奏李汎ㇵ火丁シㇵ　・　　・・・　ㇸㇵㇵ|
+// |李汎一火シ一ㇸ一一ㇵㇵシ丁ビ丁丁丁火せせ|
+// |せビミ一・　ㇸ　ㇵ丁せ允汎汎汎允洪洪洪労|
+// |丁ミㇸ　シシ　ヘ火允労和耗李洪允山せ火山|
+// |せヘ　　ビヘ・ミ山労奏陽和汎せ丁シヘシミ|
+// |ビヘ・ㇸビシ・ミ允李群陽李允ビシ　ㇸシ　|
+// |ミシ　ヘ丁シ　ミ允和陽陽李山ミ・ミ・ㇸ　|
+// |火ヘミ　丁ヘㇸビ洪奏覇奏洪火一一ㇵㇵ一・|
+// |丁山シ一ㇸ・シ山和義陽李せヘㇸㇸヘㇸヘヘ|
+// |允火一ヘㇵㇵ火労群慶耗允ミ　ㇵㇸヘ一ビミ|
+// |せミ火せ丁シ山和義陽李山ヘㇵ一ミ・一ミミ|
+// |せミ山洪ビヘせ労群義和允火火火ビミ一　ヘ|
+// |ミビシ火丁一シ山労群義和洪労労洪允せミ一|
+// |丁一ㇵㇸ一・・ヘ火洪耗陽奏耗洪山火ビ丁ビ|
+// |・丁ㇸ一ㇵヘ　ㇸ丁允李奏群奏李允せビ丁丁|
+// |ビ・シ　・シ・シせ労群義和労李李洪允せ山|
+// |　ミミ・・　ヘせ労群義和允せせせせ允汎汎|
+// |　　シビミㇵ火労群慶耗汎丁ヘヘㇵシ丁丁丁|
+// |せシ山汎ビミ允和慶群労せㇵㇸ一ㇸ　・・・|
 // +----------------------------------------+
-// 2026 (May 29th) 16:49:45
+// 2026 (June 9th) 20:29:19
 // end signature
+
