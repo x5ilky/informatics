@@ -56,7 +56,7 @@ Let $
 f(i,j) &= sum_(Q=j+1)^(B-k+i) 1/(Q-1) f(i+1,Q) \
 f(k-1,j) &= sum_(Q=j+1)^(B-1) 1/(Q-1) \
 f(i,j) &= f(i,j+1) + 1/j f(i+1,j+1) \
-"if" j > B-D+i "then" f(i,j) &= 0
+f(i,j) &= 0 "if" j > B-D+i 
 $
 
 Therefore $"#trees" = (N-1)!/(B-1)f(0,1)$.
@@ -75,9 +75,8 @@ $
 Define $g(i,j)$ as where $k = D-2$:
 $
 g(i,j) &= sum_(Q=j+1)^(B-k+i) c(Q)/(Q-1) g(i+1,Q) \
-g(k-1,j) &= sum_(Q=j+1)^(B-k+i) c(Q)/(Q-1) \
-g(k,j) &= 1\
-"if" i < k "then" g(i,B-1) &= 0  \
+g(k,j) &= 1 \
+g(i,B-1) &= 0 "if" i < k \
 g(i,j) &= g(i,j+1) + c(j+1)/j g(i+1,j+1)
 $
 
