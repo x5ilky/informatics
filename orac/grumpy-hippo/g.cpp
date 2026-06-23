@@ -25,8 +25,8 @@ signed main() {
         // printf("%d has %lld\n",i,fac[N]*inverse(N-c)%MOD);
         ans%=MOD;
     }
-    // int add=fac[N];
-    // add*=accumulate(A.begin()+1,A.end(),0ll)%MOD;add%=MOD;
-    // ans+=add;ans%=MOD;
+    int add=fac[N];
+    add*=accumulate(A.begin()+1,A.end(),0ll)%MOD;add%=MOD;
+    ans+=add;ans%=MOD;
     cout<<ans<<endl;
 }
