@@ -11,6 +11,7 @@ long long inverse(long long a) {
     return power(a, MOD - 2);
 }
 signed main() {
+    cin.tie(0)->sync_with_stdio(0);
     int N;cin>>N;
     vector<int>A(N+1);
     for(int i=1;i<=N;i++)cin>>A[i];
