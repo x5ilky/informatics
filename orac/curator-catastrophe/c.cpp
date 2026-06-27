@@ -1,50 +1,32 @@
-#include <bits/stdc++.h>
-using namespace std;
-// BEGIN DEBUG
-#define __t template
-#define __T typename
-#define _U(a,b) using _ ## a = b;
-_U(OS,ostream)_U(S,string)_U(F,false_type)_U(T,true_type);__t<class T>struct _is:_F{};
-#define _T_(d,c) __t<d>struct _is<c>:_T{};
-_T_(,_S);_T_(,char*);_T_(,const char*);_T_(size_t N,char[N]);_T_(size_t N,const char[N]);
-#undef _T_
-__t<class T>struct is_iterable{__t<class U>static auto test(int)->decltype(begin(declval<const U&>()),end(declval<const U&>()),_T{});__t<class>static _F test(...);static const bool value=decltype(test<T>(0))::value;}; __t<class A,class B>_OS& operator<<(_OS&,const pair<A,B>&); __t<class...Ts>_OS& operator<<(_OS&,const tuple<Ts...>&); __t<class T>__T enable_if<is_iterable<T>::value&&!_is<__T decay<T>::type>::value,_OS&>::type operator<<(_OS&,const T&); __t<class A,class B>_OS& operator<<(_OS& o,const pair<A,B>& p){return o<<'('<<p.first<<","<<p.second<<')';} __t<int I,class...Ts>__T enable_if<I==sizeof...(Ts),void>::type _pt(_OS&,const tuple<Ts...>&){} __t<int I,class...Ts>__T enable_if<I<sizeof...(Ts),void>::type _pt(_OS& o,const tuple<Ts...>& t){if(I)o<<",";o<<get<I>(t);_pt<I+1>(o,t);} __t<class...Ts>_OS& operator<<(_OS& o,const tuple<Ts...>& t){o<<'(';_pt<0>(o,t);return o<<')';} __t<class T>__T enable_if<is_iterable<T>::value&&!_is<__T decay<T>::type>::value,_OS&>::type operator<<(_OS& o,const T& v){o<<'[';bool f=0;for(const auto& x:v)o<<(f?",":""),f=1,o<<x;return o<<']';}
-namespace dbg{ inline void _fs(_OS& os,const _S& fmt){os<<fmt;} __t<__T T,__T...Rest>void _fs(_OS& os,const _S& fmt,const T& value,const Rest&...rest){size_t pos=fmt.find("{}");if(pos==_S::npos)throw runtime_error("too many arguments for format _S");os<<fmt.substr(0,pos)<<value;_fs(os,fmt.substr(pos+2),rest...);} __t<__T...Args>void print(_OS& os,const _S& fmt,const Args&...args){
-#ifdef DEBUG
-_fs(os,fmt,args...);
-#endif
-} __t<__T...Args>void println(_OS& os,const _S& fmt,const Args&...args){
-#ifdef DEBUG
-_fs(os,fmt,args...);os<<'\n';
-#endif
-} __t<__T...Args>void print(const _S& fmt,const Args&...args){print(cerr,fmt,args...);} __t<__T...Args>void println(const _S& fmt,const Args&...args){println(cerr,fmt,args...);} }
-#define dprint(...) dbg::println(__VA_ARGS__)
-#define dcheck(v) dbg::println("{} = {}",#v,v)
-// END DEBUG
+// #pragma GCC optimize("O3,unroll-loops")
+// #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #include <bits/stdc++.h>
 using namespace std;
 int main() {
+    cin.tie(0)->sync_with_stdio(0);
     int N;cin>>N;
-    vector<int>A(N+1),B(N+1);
+    vector<int>A(N+1),B(N+1),A2;
     for(int i=1;i<=N;i++)cin>>A[i];
     for(int i=1;i<=N;i++)cin>>B[i];
+    A2=A;
     if(all_of(B.begin()+1,B.end(),[&](int v){return v==B[1];}))
         return cout<<(is_sorted(A.begin()+1,A.end())?0:-1)<<endl,0;
-    int _p=0,_m=0;
-    vector<vector<int>>poly,mono;
+    vector<vector<int>>poly;
+    vector<pair<int,vector<int>>>mono;
     vector<int>seen(N+1);
-    unordered_map<int,int>P;
-    map<int,int>H;
+    vector<int>P(2e5+1);
+    unordered_map<int,int>H;
+    vector<int>pv;
+    set<int>ps;
+    set<int>cols;
     for(int i=1;i<=N;i++){
         P[A[i]]=i;
         if(seen[i])continue;
         if(A[i]==i){
-            H[B[i]]=A[i];
+            H[B[i]]=i;
             continue;
         }
-        vector<int>pv={i};
-        set<int>ps={i};
-        set<int>cols={B[i]};
+        pv={i};ps={i};cols={B[i]};
         int j=i;
         seen[j]=true;
         while(ps.find(A[j])==ps.end()){
@@ -54,8 +36,8 @@ int main() {
             cols.insert(B[j]);
             seen[j]=true;
         }
-        (cols.size()==1?mono:poly).push_back(pv);
-        (cols.size()==1?_m:_p)+=pv.size();
+        if(cols.size()==1)mono.push_back({*cols.begin(),pv});
+        else poly.push_back(pv);
     skip:;
     }
     using pii=pair<int,int>;
@@ -66,7 +48,6 @@ int main() {
         swap(P[a],P[b]);
     };
     for(auto&p:poly){
-        dcheck(p);
         for(auto v:p)H[B[v]]=v;
         int j=0;
         for(int i=0;i<p.size();i++){
@@ -92,78 +73,72 @@ int main() {
             // dprint("i = {}, moves = {}",i+1,moves);
         }
     }
-    // bug is that monochromatic cycles can save swaps by using
-    // same position as commutator for cycles of different colors
-    // however this means you need to like chain cycles of 
-    // differing colors together to create the largest chain
-    // and then resolve that all at once to fix everything
-    // something like that
-    //
-    // consider 
-    // 
-    // 2 3 1 5 6 4
-    // 2 3 5 1 6 4
-    // 1 3 5 2 6 4
-    // 1 2 5 3 6 4
-    // 1 2 3 5 6 4
-    // 4 2 3 5 6 1
-    // 5 2 3 4 6 1
-    // 6 2 3 4 5 1
-    // 1 2 3 4 5 6
-    // 
-    // 2 3 1 5 6 4
-    // 2 3 5 1 6 4
-    // 1 3 5 2 6 4
-    // 1 2 5 3 6 4
-    // 1 2 6 3 5 4
-    // 1 2 4 3 5 6
-    // 1 2 3 4 5 6
-
-    for(auto&v:mono){
-        dcheck(v);
-        int h;
-        for(int i=1;i<=N;i++){
-            if(B[i]!=B[v[0]]){
-                h=A[i];
-                break;
+    {
+        map<int,int>cnt;
+        map<int,vector<vector<int>>>byc;
+        for(auto&[c,v]:mono)cnt[c]++,byc[c].push_back(v);
+        priority_queue<pii>pq;
+        for(int i=1;i<=2e5;i++)if(cnt[i])pq.push({cnt[i],i});
+        while(pq.size()>=2){
+            auto [c1,t1]=pq.top();pq.pop();
+            auto [c2,t2]=pq.top();pq.pop();
+            auto p1=byc[t1].back();byc[t1].pop_back();
+            auto p2=byc[t2].back();byc[t2].pop_back();
+            H[t1]=p1[0];
+            H[t2]=p2[0];
+            swp(p1[0],p2[0]);
+            for(int i=1;i<p1.size();i++)swp(p1[i-1],p1[i]);
+            for(int i=1;i<p2.size();i++)swp(p2[i-1],p2[i]);
+            swp(p1.back(),p2.back());
+            if(c1-1>0)pq.push({c1-1,t1});
+            if(c2-1>0)pq.push({c2-1,t2});
+        }
+        if(pq.size()){
+            auto[c,t]=pq.top();pq.pop();
+            for(auto&v:byc[t]){
+                int h;
+                for(auto [c,i]:H)if(c!=t){ h=i; break; }
+                swp(v[0],h);
+                for(int i=1;i<v.size();i++){
+                    swp(v[i-1],v[i]);
+                }
+                swp(v.back(),h);
             }
         }
-
-        swp(v[0],h);
-        for(int i=1;i<v.size();i++){
-            swp(v[i-1],v[i]);
-        }
-        swp(v.back(),h);
     }
-    assert(moves.size()==(_p-poly.size()+_m+mono.size()));
     cout<<moves.size()<<endl;
-    for(auto [u,v]:moves)cout<<u<<" "<<v<<endl;
+    for(auto [u,v]:moves){
+        cout<<u<<" "<<v<<endl;
+        swap(A2[u],A2[v]);
+    }
 }
 
 // begin signature
 // +----------------------------------------+
-// |・・　・ㇵ丁山労耗李労労労和奏義覇覇覇覇|
-// |山山せ丁ヘ　ヘせ火丁ミミ丁火允李群覇覇覇|
-// |奏奏和洪せシ　　一ヘヘㇵ・ㇸミ山李耗奏義|
-// |覇覇慶群李山ミせ允労労允火シ　ミビせ汎和|
-// |覇覇覇覇義和労労洪洪洪李耗汎丁一ㇸ・ヘせ|
-// |覇覇慶陽和汎せ丁シヘシミビ山労汎山せミ　|
-// |覇群奏和允丁一・ㇵシシヘ一　ヘ丁火允労允|
-// |慶和奏汎丁・ヘビ丁ミミビせせ丁ㇵㇸ・シせ|
-// |覇陽洪丁　ミㇵ一ミビ丁ミシシビ汎山ビㇵシ|
-// |群汎シ一せシせ火ヘ　ㇵ一　・ㇸミ允洪丁・|
-// |允ㇵシ山山允ヘㇸ丁　ヘビせせせ火山和山ㇸ|
-// |ヘシ洪耗山一シシ一せ労耗奏耗奏汎火洪洪ㇵ|
-// |・火和労丁一丁・火李陽慶耗洪せビミヘシビ|
-// |ㇵ丁李和ビㇸ丁一山耗陽奏洪ビ火ㇵ　一ㇵㇸ|
-// |ビㇸ山群允一丁・ビ和慶耗山ヘ・一火山允允|
-// |允ㇸビ和李ミㇵシシ洪洪労洪山ビ火洪耗群陽|
-// |允一丁李李丁一ミㇵビシミビ洪汎労陽覇覇慶|
-// |火　せ耗洪シㇵシ一ㇸミ汎耗陽群慶覇覇義奏|
-// |ミ一山奏汎ヘヘミ　火洪耗群群群陽群和耗山|
-// |丁ㇸせ和洪丁　ミ一ㇵビ山允山汎汎允和せ一|
+// |ㇸ一・　ㇵ丁允和群耗和和和奏陽覇覇覇覇覇|
+// |汎汎允火ミ・シ山せ丁ミミビせ洪耗義覇覇覇|
+// |慶義群和汎丁　一丁せ山ビㇸㇸ丁允洪李耗陽|
+// |覇覇覇慶奏汎労和李李李耗群山・一シ丁せ洪|
+// |覇覇覇義和汎せ丁ミシミビ山労洪ビシㇸ　ヘ|
+// |覇覇義李せシ　一シミミヘ・一ビせ允允丁一|
+// |覇慶奏允シㇸ丁丁シシミビ山せシ一　ㇵビ洪|
+// |覇慶李ビ　ビ丁ミ火允火丁ミビビ洪允火ヘシ|
+// |覇耗せ・ㇵシ山丁労奏陽群李せ・シ山耗允ヘ|
+// |奏汎允火シ火ビビ火山洪和陽覇李丁せ洪奏火|
+// |労せシ・ㇸㇵㇸ火　ㇸミ山労和群允ㇵ洪洪火|
+// |ㇵ一丁山ビ一ビㇸせ丁ㇸ一シせ洪允ミ丁ヘビ|
+// |ㇸ允和労ヘ丁ㇵ丁和和允ビシ・シビミ一ㇸㇸ|
+// |ㇸ火奏耗丁ヘミミ李群労山ビ丁丁　ㇸㇵヘ一|
+// |火一汎慶洪一ビ・せ李せ丁ヘ　　丁せ汎汎洪|
+// |洪ㇵビ耗奏火一ビㇵ汎労労李山せ山せビ一一|
+// |労シミ李陽山・火・丁ビ洪労汎汎ビㇸ丁火ビ|
+// |洪ㇵ丁和群山・ビㇵシ汎奏義群労ミ洪耗耗李|
+// |允ㇸビ和奏山一シミㇸビ允洪洪洪労洪耗労丁|
+// |汎ヘシ汎群労ビㇸㇵミ・ㇸㇵㇸミ汎耗允ヘㇵ|
 // +----------------------------------------+
-// 2026 (June 26th) 23:23:49
+// 2026 (June 27th) 13:41:05
 // end signature
+
+
 
 
