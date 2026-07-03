@@ -1,12 +1,14 @@
-#let definition(body)=[*Definition.* #body]
-
-#align(center + horizon, [
-  #text(size: 3em)[= #smallcaps[Tree Dash]]
-  Notes on various observations required in order to solve _Tree Dash_.
-])
+#import "@preview/euler-math:0.1.0": *
+#show: euler-math.with(
+  title: [Tree Dash Notes],
+  subtitle: [Notes on various observations required in order to solve _Tree Dash_.],
+  author: [Ethan Cai]
+)
 
 #outline()
 #pagebreak()
+
+#let wrap(fn)=(..args, body)=>fn(..args)[#box(inset: (right: 1em), body)]
 
 = Notation
 
@@ -23,12 +25,12 @@
   Similarly we define the minimum and maximum descendants to be $mindesc(u)$ and $maxdesc(u)$.
   
   We also define the dependencies of a node $u$ to be the set of all nodes such that $u$ is reachable from that node. In that vein, the dependency sum is the sum of weights of all dependencies of a node (including itself).
+
+  We call the tree from the input data to be the *initial tree*, the graph created from the various operations to be the *initial graph* and the eventual condensation graph to be the *SCC graph*.
 ]
 
-We call the tree from the input data to be the *initial tree*, the graph created from the various operations to be the *initial graph* and the eventual condensation graph to be the *SCC graph*.
-
-
 == Lemma 1
+
 *Claim.* You can reduce the two ancestor edges into a single _up edge_.
 
 *Proof.* For any node $u$, consider the two orderings of the min and max ancestor edge destinations. 
@@ -43,6 +45,7 @@ Since the lower node can reach anything the higher node can, there is no reason 
 We will henceforth refer the this compressed edge as the _up edge_ and denote it $up u$.
 
 == Lemma 2
+
 After running SCC, let's call any SCC that only has one node a *singleton* and any SCC with more than one node *real*.
 
 #definition[
@@ -59,9 +62,11 @@ If $u$ was below $S$, clearly $S$ is an ancestor of $u$. However, since $S$ is a
 A similar argument can be used to disprove the case where $u$ is above $S$.
 
 == Lemma 3
+
 With the same logic as _Lemma 2_, it can be shown that all real SCC's cannot have a downwards edge.
 
 == Lemma 4
+
 *Claim.* The real SCC's in the SCC graph can be reduced to form a tree while keeping connectivity.
 
 *Proof.* Take an SCC $S$. It cannot have an edge to anything below it because of _Lemma 3_. However, you can repeatedly take up-edges until it hits the root. 
@@ -111,6 +116,7 @@ This transformation turns the singleton-graph into this weird hybrid directed tr
 *Proof.* Let the destination of the down-edges be $A$. $A$ must not connect to $u$ by _Lemma 2_. However, that means that $A$ and $u$ must share an up-edge, so they must all have the same up-component.
 
 #let weight=math.op("weight")
+#let base=math.sans("base")
 = Solution
 - Compress up-edges and down-edges
 - Run SCC
@@ -118,12 +124,12 @@ This transformation turns the singleton-graph into this weird hybrid directed tr
 - Compute path sums for all SCC's in SCC tree.
 - Go by reverse postorder through all singleton nodes:
   - Let $mono("wr")[u]$ denote the sum of weights of the real SCC's that are reachable from $u$.  Let $ weight u = cases(mono("wr")[u] &"if" u "is a singleton", "path sum of" u &"if" u "is a real SCC") $
-    - Let $"base" = "path sum of" u$
-    - If $u$ has no children, $mono("wr")[u] = "base"$
+    - Let $base = "path sum of" u$
+    - If $u$ has no children, $mono("wr")[u] = base$
     - If $u$ has one child $a$, $mono("wr")[u] = weight a$
-    - If $u$ has two children $a$ and $b$, $mono("wr")[u] = weight a + weight b - "base"$.
-      - Why? If you have one child, you do not want to add $"base"$ since you would double count it.
-      - If you have two children, you double-count $"base"$ once, so you need to subtract it to compensate. This reasoning follows for real SCC's by _Lemma 9_. If you had two real SCC's $A$ and $B$ from the two down edges, they must both overlap $"base"$ since they share the up-edge. Therefore you _still_ have to subtract it. Similar reasoning applys for one real SCC from down-edges.
+    - If $u$ has two children $a$ and $b$, $mono("wr")[u] = weight a + weight b - base$.
+      - Why? If you have one child, you do not want to add $base$ since you would double count it.
+      - If you have two children, you double-count $base$ once, so you need to subtract it to compensate. This reasoning follows for real SCC's by _Lemma 9_. If you had two real SCC's $A$ and $B$ from the two down edges, they must both overlap $base$ since they share the up-edge. Therefore you _still_ have to subtract it. Similar reasoning applys for one real SCC from down-edges.
   - Let $mono("ws")[u]$ denote the sum of weights of singletons that are reachable from $u$. This is trivially obtainable as a "tree" dp.
 The answer is:
 $
