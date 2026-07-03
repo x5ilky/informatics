@@ -44,6 +44,12 @@ Since the lower node can reach anything the higher node can, there is no reason 
 
 We will henceforth refer the this compressed edge as the _up edge_ and denote it $up u$.
 
+== Lemma 1.2
+
+*Claim.* For any two nodes $a$ and $b$, if there exists an edge $a -> b$, either $up b = a$ or $up b = up a$.
+
+*Proof.* Trivial. If $a$ was a new max/min along $b$'s ancestor path, $b$'s up-edge would go to $a$. Otherwise, they must share the same up-edge.
+
 == Lemma 2
 
 After running SCC, let's call any SCC that only has one node a *singleton* and any SCC with more than one node *real*.
@@ -56,8 +62,9 @@ After running SCC, let's call any SCC that only has one node a *singleton* and a
 
 *Proof.* Proof by contradiction.
 
-Let the real SCC be $S$ and the singleton be $u$. Say there was an edge from $S -> u$. 
-If $u$ was below $S$, clearly $S$ is an ancestor of $u$. However, since $S$ is a real SCC, there must also be an up-edge into the top of $S$. Therefore $S$ must be a new minimum or maximum along $u$'s ancestor path. Therefore, $u$ must also be connected to $S$. However, we defined $u$ to be a singleton. Hence, contradiction.
+Let the real SCC be $S$ and the singleton be $u$. Assume for the sake of contradiction that there existed an edge $S -> u$. 
+
+If $u$ was below $S$, clearly $S$ is an ancestor of $u$. However, since $S$ is a real SCC, there must exist some element $x in S$ such that $up x = mono("top") S$. Therefore $S$ must be a new minimum or maximum along $u$'s ancestor path. Hence, $u$ must also be connected to $S$. However, we defined $u$ to be a singleton. Contradiction.
 
 A similar argument can be used to disprove the case where $u$ is above $S$.
 
@@ -71,7 +78,7 @@ With the same logic as _Lemma 2_, it can be shown that all real SCC's cannot hav
 
 *Proof.* Take an SCC $S$. It cannot have an edge to anything below it because of _Lemma 3_. However, you can repeatedly take up-edges until it hits the root. 
 
-Let another real SCC $T$ be reachable from $S$. By properties of the initial tree, anything $T$ can reach can also be reached from $S$. Therefore, you only need the deepest real SCC reachable from $S$, since this preserves connectivity. Since every node is connected and there is one up-edge per real SCC (except for the root), these connections in the SCC graph can be reduced to a tree while keeping connectivity. 
+Let another real SCC $T$ be reachable from $S$. By properties of the initial tree, anything $T$ can reach can also be reached from $S$. Observe that you only need the deepest real SCC reachable from $S$ to preserve connectivity. Since every node is connected and there is one retained up-edge per real SCC (except for the root), these connections in the SCC graph can be reduced to a tree while keeping connectivity. 
 
 Since the SCC graph forms a tree, we will call it the SCC tree. The path sum of a SCC $S$ is the sum of all weights of all SCC's on the path from $S$ to the root SCC.
 
@@ -83,15 +90,15 @@ We define the singleton-graph to be the subset of the SCC graph with only single
 
 *Proof.* Trivial. Consider a singleton $u$. It has an up-edge and down-edge(s). If the down-edge led to above $u$, it ceases to be a down-edge. 
 
-If somehow there was a case where $u stretch(arrow)^"up-edge" v stretch(arrow)^"down-edge" w$, breaking the depth order, $w$ must also have an edge back to $v$, and similarly for $u$. This creates a real SCC, contradiction.
+Suppose there was somehow a case where $u stretch(arrow)^"up-edge" v stretch(arrow)^"down-edge" w$, breaking the depth order. $w$ must also have an edge back to $v$ because $v$ is a new min/max along its ancestor path. This creates a real SCC consisting of $v$ and $w$, contradiction.
 
 == Lemma 6
 
-Define the _up-component_ of a singleton $u$ to be the real SCC that is eventually reachable by repeatedly taking up-edges from $u$.
+Define the _up-component_ of a singleton $u$ to be the first real SCC that is reachable by repeatedly taking up-edges from $u$.
 
 *Claim.* If a singleton $u$ has an up-component $S$, all of $u$'s descendants must also have up-component $S$.
 
-*Proof.* Let $u$ be a singleton and $v$ be one of $u$'s children. Since $u$ has an up-edge, $v$ must either have the same up-edge, or point to $u$. Thus, they must reach the same up-component. Claim for all descendents can be proven by induction.
+*Proof.* Let $u$ be a singleton and $v$ be one of $u$'s children. Since $u$ has an up-edge, $v$ must either have the same up-edge, or point to $u$ by _Lemma 1.2_. Thus, they must reach the same up-component. Claim for all descendents can be proven by induction.
 
 == Lemma 7
 
