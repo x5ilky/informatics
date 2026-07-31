@@ -6,7 +6,7 @@ if [[ "$file" =~ ^https?:// ]]; then
     filename="${filename%%\?*}"
     filename="${filename:-download.zip}"
 
-    wget -O "$filename" "$file"
+    curl -o "$filename" -LO "$file"
     file="$filename"
 fi
 rm -rf .temp
