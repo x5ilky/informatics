@@ -6,14 +6,36 @@ if [[ "$file" =~ ^https?:// ]]; then
     filename="${filename%%\?*}"
     filename="${filename:-download.zip}"
 
-    curl -o "$filename" -LO "$file"
+    curl -L -o "$filename" "$file"
     file="$filename"
 fi
+
 rm -rf .temp
 mkdir -p .temp
-unzip "$file" -d .temp
-rm "$file"
+
+case "$file" in
+    *.zip)
+        unzip "$file" -d .temp
+        ;;
+    *.tar|*.tar.gz|*.tgz|*.tar.bz2|*.tbz2|*.tar.xz|*.txz|*.tar.zst|*.tzst)
+        tar -xf "$file" -C .temp
+        ;;
+    *)
+        echo "Unsupported archive format: $file" >&2
+        rm -rf .temp
+        exit 1
+        ;;
+esac
+
+rm -f "$file"
+
 mv .temp/*/** .
 rm -rf .temp
-rm submit_*.sh
+
+rm -f \
+    submit_*.sh \
+    compile_*.sh \
+    *.c \
+    *.pas
+
 printf '\033[1;32m✓ IMPORTED\033[0m\n'
