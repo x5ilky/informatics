@@ -29,7 +29,10 @@ esac
 
 rm -f "$file"
 
-mv .temp/*/** .
+(
+    shopt -s nullglob
+    mv -f .temp/**/* .temp/* .
+)
 rm -rf .temp
 
 rm -f \
