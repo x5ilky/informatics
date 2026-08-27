@@ -10,8 +10,8 @@ struct node{
         if(r)cnt+=r->cnt;
     }
     void fix(){
-        if(!l)l=new node(0ll,0ll);
-        if(!r)r=new node(0ll,0ll);
+        if(!l)l=new node(0ll);
+        if(!r)r=new node(0ll);
     }
     node*add(int tl,int tr,int pos,int a){
         if(tl==tr)return new node(cnt+a);
