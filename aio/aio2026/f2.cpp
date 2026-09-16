@@ -4,6 +4,42 @@
 #include <bits/stdc++.h>
 #define int long long
 using namespace std;
+//chatgpt double fenwick because constant factor
+struct fenwick {
+    int N;
+    vector<long long> T1, T2;
+
+    fenwick(int N): N(N), T1(N+2), T2(N+2) {}
+
+    void add(vector<long long>& T, int i, long long x) {
+        for (; i <= N; i += i & -i) T[i] += x;
+    }
+
+    long long query(const vector<long long>& T, int i) const {
+        long long ans = 0;
+        for (; i > 0; i -= i & -i) ans += T[i];
+        return ans;
+    }
+
+    // add x to [l, r]
+    void add(int l, int r, long long x) {
+        add(T1, l, x);
+        add(T1, r + 1, -x);
+
+        add(T2, l, x * (l - 1));
+        add(T2, r + 1, -x * r);
+    }
+
+    // sum of [1, i]
+    long long query(int i) const {
+        return query(T1, i) * i - query(T2, i);
+    }
+
+    // sum of [l, r]
+    long long query(int l, int r) const {
+        return query(r) - query(l - 1);
+    }
+};
 struct segtree{
     using node=struct{
         int sm,lz;
@@ -64,17 +100,17 @@ signed main() {
     for(int r=1;r<=N;r++){
         sort(c.begin()+1,c.end());
         int j=N,i=N,rem=RS[r].first;
-        segtree st(N+1),str(N+1);
+        fenwick st(N+1),str(N+1);
         auto take=[&](int l,int r,int v){
-            st.update(1,0,N,l,r,-v);
-            str.update(1,0,N,l,r,v);
+            st.add(l,r,-v);
+            str.add(l,r,v);
             rem-=(r-l+1)*v;
             // printf("take %d-%d amt %d\n",l,r,v);
         };
         // printf("[[START REM = %d]]\n",rem);
-        for(int j=1;j<=N;j++)st.update(1,0,N,j,j,c[j].first);
+        for(int j=1;j<=N;j++)st.add(j,j,c[j].first);
         while(rem){
-            if(st.query(1,0,N,1,N)<=0){
+            if(st.query(1,N)<=0){
                 // printf("NOT ENOUGH\n");
                 cout<<"NO"<<endl;
                 return 0;
@@ -82,9 +118,9 @@ signed main() {
             // printf("rem = %d\n",rem);
             // for(int i=1;i<=N;i++)printf("%lld ",st.query(1,0,N,i,i));printf("\n");
             // for(int i=1;i<=N;i++)printf("%lld ",str.query(1,0,N,i,i));printf("\n");
-            while(i>1&&st.query(1,0,N,i,i)==st.query(1,0,N,i-1,i-1))i--;
-            int mxrem=K-str.query(1,0,N,j,j);
-            int dif=st.query(1,0,N,i,i)-st.query(1,0,N,i-1,i-1);
+            while(i>1&&st.query(i,i)==st.query(i-1,i-1))i--;
+            int mxrem=K-str.query(j,j);
+            int dif=st.query(i,i)-st.query(i-1,i-1);
             int rm=min(dif,mxrem);
             // printf("i,j = [%d,%d]\n",i,j);
             // printf("rm = %d\n",rm);
@@ -103,12 +139,12 @@ signed main() {
                 if(rem==0)break;
                 take(i,i+rem-1,1);
             }
-            while(j>1&&str.query(1,0,N,j,j)>=K)i=min(i,--j);
+            while(j>1&&str.query(j,j)>=K)i=min(i,--j);
         }
         // printf("[[END REM]]\n");
-        // for(int k=1;k<=N;k++)printf("%lld ",st.query(1,0,N,k,k));printf("\n");
-        for(int k=1;k<=N;k++)out[RS[r].second][c[k].second]=c[k].first-st.query(1,0,N,k,k);
-        for(int k=1;k<=N;k++)c[k].first=st.query(1,0,N,k,k);
+        // for(int k=1;k<=N;k++)printf("%lld ",st.query(k,k));printf("\n");
+        for(int k=1;k<=N;k++)out[RS[r].second][c[k].second]=c[k].first-st.query(k,k);
+        for(int k=1;k<=N;k++)c[k].first=st.query(k,k);
     }
     int s=0;
     for(auto v:c)s+=v.first;
