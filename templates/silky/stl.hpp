@@ -55,11 +55,20 @@ struct Vec : std::vector<T> {
     int fn(const T&v,int i=1){ \
         return fn(v,i,this->size()); \
     }
+#define _wrap_ret_range(fn) \
+    void fn(const T&v,int i,int j){ \
+        std::fn(this->begin()+i,this->begin()+j,v); \
+    } \
+    void fn(const T&v,int i=1){ \
+        fn(v,i,this->size()); \
+    }
     _wrap_ret_it(find);
     _wrap_ret_it(lower_bound);
     _wrap_ret_it(upper_bound);
     _wrap_ret_void(reverse);
     _wrap_ret_void(sort);
+    _wrap_ret_range(fill);
+
     Vec(const std::vector<T>&V) {
         this->reserve(V.size()+1);
         this->emplace_back();
@@ -72,7 +81,7 @@ struct Vec : std::vector<T> {
         for(auto&x:V)A.emplace_back(std::move(x));
         return A;
     }
-    int sz() {
+    int sz() const {
         return this->size();
     }
     // DOES NOT INCLUDE ZEROTH ELEMENT
@@ -145,7 +154,7 @@ struct DSU {
     }
 };
 using pii=std::pair<long long,long long>;
-template <bool directed>
+template <bool directed = 0>
 struct Graph{
     int N;
     Vec<Vec<pii>>g;
@@ -169,6 +178,35 @@ struct Graph{
     template<bool weighted=false>
     void read_tree() {
         read_graph<weighted>(N-1);
+    }
+    template<int node_index_offset = 1>
+    void input_from_vecs(const std::vector<int>&P,const std::vector<int>&Q) {
+        int M=P.size();
+        for(int i=0;i<M;i++)
+            (*this)(P[i]+node_index_offset,Q[i]+node_index_offset);
+    }
+    void input_from_vecs(const Vec<int>&P,const Vec<int>&Q) const{
+        int M=P.sz()-1;
+        for(int i=1;i<=M;i++)
+            (*this)(P[i],Q[i]);
+    }
+    int centroid(int u = 1) {
+        Vec<int>sz(N+1,1);
+        std::function<void(int,int)>dfs=[&](int u,int p){
+            for(auto [v,_]:g[u]){
+                if(v==p)continue;
+                dfs(v,u);
+                sz[u]+=sz[v];
+            }
+        };
+        dfs(u,-1);
+        std::function<int(int,int)>dfs2=[&](int u,int p){
+            for(auto [v,_]:g[u]){
+                if(v!=p&&sz[v]>N/2)return dfs2(v,u);
+            }
+            return u;
+        };
+        return dfs2(u,-1);
     }
 };
 struct SCC {

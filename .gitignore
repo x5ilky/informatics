@@ -5,3 +5,5 @@
 **/.DS_Store
 **/*.dSYM/
 **/a.out
+
+**/*.e.cpp
