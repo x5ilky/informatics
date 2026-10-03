@@ -208,6 +208,28 @@ struct Graph{
         };
         return dfs2(u,-1);
     }
+    Vec<int> top_sort() const {
+        Vec<int> deg(N+1);
+        for(int u=1;u<=N;u++)
+            for(auto [v,_]:g[u])
+                deg[v]++;
+        std::queue<int>q;
+        for(int u=1;u<=N;u++)
+            if(deg[u]==0)
+                q.push(u);
+        Vec<int> ord;
+        while(q.size()){
+            int u=q.front();
+            q.pop();
+            ord.push_back(u);
+            for(auto [v,_]:g[u])
+                if(--deg[v]==0)
+                    q.push(v);
+        }
+        if(ord.size()!=N)
+            return {};
+        return ord;
+    }
 };
 struct SCC {
     Graph<1>&g;
@@ -233,7 +255,7 @@ private:
             if(comp[v]==-1)tlow[u]=std::min(tlow[u],tlow[v]);
         }
         if(tlow[u]==tin[u]){
-            int c=comps++;
+            int c=++comps;
             root[c]=u;
             while(true){
                 auto v=st.back();st.pop_back();
@@ -260,16 +282,17 @@ template<typename T,auto id,auto f>
 struct Stable{
     int N,K;
     Vec<Vec<int>>st;
-    Stable(Vec<int>A){
-        N=A.size();
+    Stable(const Vec<int>&A){
+        N=A.size()-1;
         K=lg(N)+2;
         st.resize(K+1,Vec<int>(N+1));
-        copy(A.begin(),A.end(),st[0].begin());
+        std::copy(A.begin(),A.end(),st[0].begin());
         for(int i=1;i<=K;i++)
-            for(int j=0;j+(1<<i)<=N;j++)
+            for(int j=0;j+(1<<i)-1<=N;j++)
                 st[i][j]=f(st[i-1][j],st[i-1][j+(1<<(i-1))]);
     }
     T query_sum(int l,int r){
+        if(r<l)return id();
         T sum=id();
         for(int i=K;i>=0;i--)
             if((1<<i)<=r-l+1){
@@ -279,6 +302,7 @@ struct Stable{
         return sum;
     }
     T query_min(int l,int r){
+        if(r<l)return id();
         int i=std::bit_width((unsigned)(r-l+1))-1;
         return f(st[i][l],st[i][r-(1<<i)+1]);
     }
