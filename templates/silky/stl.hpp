@@ -590,6 +590,51 @@ T& chmax(T&v, const T&a){
     return v;
 }
 
+struct RangeContainer {
+    using ll=long long;
+    void add(ll l,ll r){
+        auto it=lower_bound(v.begin(),v.end(),l,[](const pii&p,ll x){
+            return p.second+1<x;
+        });
+        auto jt=it;
+        while(jt!=v.end()&&jt->first<=r+1){
+            l=std::min(l,jt->first);
+            r=std::max(r,jt->second);
+            ++jt;
+        }
+        it=v.erase(it,jt);
+        v.insert(it,{l,r});
+    }
+
+    // First range containing point $x$
+    auto containing(ll x){
+        auto it=lower_bound(v.begin(),v.end(),x,[](const pii&p,ll x){
+            return p.second<x;
+        });
+        if(it!=v.end()&&it->first<=x)return it;
+        return v.end();
+    }
+    // First range completely containing $[l,r]$
+    auto containing(ll l,ll r){
+        auto it=lower_bound(v.begin(),v.end(),l,[](const pii&p,ll x){
+            return p.second<x;
+        });
+        if(it!=v.end()&&it->first<=l&&r<=it->second)return it;
+        return v.end();
+    }
+
+    // First range overlapping $[l,r]$
+    auto overlapping(ll l,ll r){
+        auto it=lower_bound(v.begin(),v.end(),l,[](const pii&p,ll x){
+            return p.second<x;
+        });
+        if(it!=v.end()&&it->first<=r)return it;
+        return v.end();
+    }
+
+    Vec<pii> v;
+};
+
 #define FOR(i,a,b) for(int i=(int)(a);i<=(int)(b);i++)
 #define ROF(i,a,b) for(int i=(int)(a);i>=(int)(b);i--)
 #define IOIV(src,dst) \
@@ -614,6 +659,7 @@ _fs(os,fmt,args...);os<<'\n';
 } __t<__T...Args>void print(const _S& fmt,const Args&...args){print(std::cerr,fmt,args...);} __t<__T...Args>void println(const _S& fmt,const Args&...args){println(std::cerr,fmt,args...);} }
 #define dprint(...) dbg::println(__VA_ARGS__)
 #define dcheck(v) dbg::println("{} = {}",#v,v)
+
 #endif
 
 // int main() {

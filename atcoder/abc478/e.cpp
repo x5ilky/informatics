@@ -11,14 +11,9 @@ int main() {
         g(v,u,t);
     }
     SCC s(g);auto dag=s.scc();
-    FOR(u,1,N){
-        for(auto [v,w]:g[u]){
-            if(s.comp[u]==s.comp[v]&&w){
-                cout<<"No\n";
-                return 0;
-            }
-        }
-    }
+    FOR(u,1,N)
+        for(auto [v,w]:g[u])
+            if(s.comp[u]==s.comp[v]&&w)return cout<<"No\n",0;
     auto top=dag.top_sort();
     Vec<int>dp(s.comps+1,1);
     top.reverse(0);
