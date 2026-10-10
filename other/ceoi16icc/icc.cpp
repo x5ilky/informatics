@@ -25,7 +25,6 @@ void run(int N){
         for(int u=1;u<=N;u++)comps[dsu[u]]+=u;
         map<int,int>id;int K=0;
         for(auto [k,v]:comps)id[k]=K++;
-        using pii=pair<int,int>;
         auto fnd=[&](){
             vector<int>bits;
             for(int i=0;(1<<i)<comps.size();i++)bits.push_back(1<<i);

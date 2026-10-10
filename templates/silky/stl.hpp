@@ -453,6 +453,7 @@ struct LazySegTree {
     }
 
     void set(int l, int r, ll x) {
+        if(r<l)return;
         set(1, 1, n, l, r, x);
     }
 
