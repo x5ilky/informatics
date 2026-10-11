@@ -281,11 +281,11 @@ constexpr int lg(T x) {
 template<typename T,auto id,auto f>
 struct Stable{
     int N,K;
-    Vec<Vec<int>>st;
-    Stable(const Vec<int>&A){
+    Vec<Vec<T>>st;
+    Stable(const Vec<T>&A){
         N=A.size()-1;
         K=lg(N)+2;
-        st.resize(K+1,Vec<int>(N+1));
+        st.resize(K+1,Vec<T>(N+1));
         std::copy(A.begin(),A.end(),st[0].begin());
         for(int i=1;i<=K;i++)
             for(int j=0;j+(1<<i)-1<=N;j++)
@@ -577,6 +577,150 @@ private:
             query(v << 1, l, m, ql, qr),
             query(v << 1 | 1, m + 1, r, ql, qr)
         );
+    }
+};
+
+template<class T = long long>
+struct PersistentSegtree {
+    struct Node {
+        int lc = 0, rc = 0;
+        T sum = T{};
+    };
+
+    struct pseg {
+        PersistentSegtree* st;
+        int root;
+
+        pseg add(int p, T x) const {
+            return {st, st->update(root, 1, st->n, p, x, false)};
+        }
+
+        pseg set(int p, T x) const {
+            return {st, st->update(root, 1, st->n, p, x, true)};
+        }
+
+        T sum(int l, int r) const {
+            if (l > r) return T{};
+            return st->query(root, 1, st->n, l, r);
+        }
+
+        T get(int p) const {
+            return sum(p, p);
+        }
+
+        T all() const {
+            return st->pool[root].sum;
+        }
+
+        // First p such that pred(sum(1, p)) is true.
+        // Returns n+1 if no such position exists.
+        // Requires pred to be monotone on prefix sums.
+        template<class F>
+        int walk(F pred) const {
+            if (!pred(all())) return st->n + 1;
+            T acc{};
+            return st->walk(root, 1, st->n, acc, pred);
+        }
+
+        // For nonnegative frequencies, 1-indexed.
+        // Returns n+1 if k is out of range.
+        int kth(T k) const {
+            if (k <= T{} || k > all()) return st->n + 1;
+            return walk([&](T s) { return s >= k; });
+        }
+    };
+
+    int n;
+    std::vector<Node> pool;
+
+    explicit PersistentSegtree(int n, int reserve_nodes = 0)
+        : n(n) {
+        pool.reserve(std::max(1, reserve_nodes));
+        pool.push_back(Node{});
+    }
+
+    pseg empty() {
+        return {this, 0};
+    }
+
+    pseg build(const std::vector<T>& a) {
+        // a is 1-indexed; a[0] is ignored.
+        return {this, build(1, n, a)};
+    }
+
+private:
+    int clone(int u) {
+        pool.push_back(pool[u]);
+        return (int)pool.size() - 1;
+    }
+
+    int build(int l, int r, const std::vector<T>& a) {
+        int u = clone(0);
+        if (l == r) {
+            pool[u].sum = a[l];
+            return u;
+        }
+
+        int m = (l + r) >> 1;
+        int lc = build(l, m, a);
+        int rc = build(m + 1, r, a);
+
+        pool[u].lc = lc;
+        pool[u].rc = rc;
+        pull(u);
+        return u;
+    }
+
+    void pull(int u) {
+        pool[u].sum =
+            pool[pool[u].lc].sum +
+            pool[pool[u].rc].sum;
+    }
+
+    int update(int u, int l, int r, int p, T x, bool assign) {
+        int v = clone(u);
+
+        if (l == r) {
+            if (assign) pool[v].sum = x;
+            else pool[v].sum += x;
+            return v;
+        }
+
+        int m = (l + r) >> 1;
+        if (p <= m) {
+            int lc = update(pool[v].lc, l, m, p, x, assign);
+            pool[v].lc = lc;
+        } else {
+            int rc = update(pool[v].rc, m + 1, r, p, x, assign);
+            pool[v].rc = rc;
+        }
+
+        pull(v);
+        return v;
+    }
+
+    T query(int u, int l, int r, int ql, int qr) const {
+        if (!u || qr < l || r < ql) return T{};
+        if (ql <= l && r <= qr) return pool[u].sum;
+
+        int m = (l + r) >> 1;
+        return query(pool[u].lc, l, m, ql, qr) +
+               query(pool[u].rc, m + 1, r, ql, qr);
+    }
+
+    template<class F>
+    int walk(int u, int l, int r, T& acc, F& pred) const {
+        if (l == r) return l;
+
+        int m = (l + r) >> 1;
+        int lc = pool[u].lc;
+        T next = acc + pool[lc].sum;
+
+        if (pred(next))
+            return walk(lc, l, m, acc, pred);
+
+        acc = next;
+        return walk(pool[u].rc, m + 1, r, acc, pred);
     }
 };
 
