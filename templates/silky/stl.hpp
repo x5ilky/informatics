@@ -43,24 +43,24 @@ struct Vec : std::vector<T> {
     using std::vector<T>::vector;
 #define _wrap_ret_void(fn) \
     void fn(int i, int j){ \
-        std::fn(this->begin()+i, this->begin()+j); \
+        std::fn(this->begin()+i, this->begin()+(j+1)); \
     } \
     void fn(int i=1){ \
-        fn(i,this->size()); \
+        fn(i,this->sz()-1); \
     }
 #define _wrap_ret_it(fn) \
     int fn(const T&v,int i,int j){ \
-        return std::fn(this->begin()+i,this->begin()+j,v)-this->begin(); \
+        return std::fn(this->begin()+i,this->begin()+(j+1),v)-this->begin(); \
     } \
     int fn(const T&v,int i=1){ \
-        return fn(v,i,this->size()); \
+        return fn(v,i,this->sz()-1); \
     }
 #define _wrap_ret_range(fn) \
     void fn(const T&v,int i,int j){ \
-        std::fn(this->begin()+i,this->begin()+j,v); \
+        std::fn(this->begin()+i,this->begin()+(j+1),v); \
     } \
     void fn(const T&v,int i=1){ \
-        fn(v,i,this->size()); \
+        fn(v,i,this->sz()-1); \
     }
     _wrap_ret_it(find);
     _wrap_ret_it(lower_bound);
@@ -94,6 +94,24 @@ struct Vec : std::vector<T> {
     }
     T rsum(int l,int r){
         return (*this)[r]-(*this)[l-1];
+    }
+    T sum(int l,int r){
+        return std::accumulate(this->begin()+l,this->begin()+(r+1),(T)0);
+    }
+    T sum(int l=1){
+        return sum(l,this->sz()-1);
+    }
+    T min(int l,int r){
+        return *std::min_element(this->begin()+l,this->begin()+(r+1));
+    }
+    T min(int l=1){
+        return min(l,this->sz()-1);
+    }
+    T max(int l,int r){
+        return *std::max_element(this->begin()+l,this->begin()+(r+1));
+    }
+    T max(int l=1){
+        return max(l,this->sz()-1);
     }
 };
 template <class T>
@@ -391,22 +409,74 @@ struct ISegtree {
     int n;
     Vec<T>t;
     ISegtree(int N):n(N),t(2*N,id()){}
-    T& operator[](int i) {return t[n + i];}
+    T& operator[](int i) {return t[n+i-1];}
     void build(){
         for(int i=n-1;i;--i)t[i]=op(t[i<<1],t[i<<1|1]);
     }
     void update(int p,T x) {
-        for(t[p+=n]=x;p>>=1;)t[p]=op(t[p<<1],t[p<<1|1]);
+        for(t[p+=n-1]=x;p>>=1;)t[p]=op(t[p<<1],t[p<<1|1]);
     }
     T query(int l,int r)const{
-        l++,r+=2;
         if(r<l)return id();
         T L=id(),R=id();
-        for (l+=n,r+=n;l<r;l>>=1,r>>=1){
+        for (l+=n-1,r+=n;l<r;l>>=1,r>>=1){
             if(l&1)L=op(L,t[l++]);
             if(r&1)R=op(t[--r],R);
         }
         return op(L,R);
+    }
+    // Largest r such that op(a[l..r]) satisfies f.
+    // Returns l-1 if the first element fails.
+    template<class F>
+    int max_right(int l,F f)const{
+        if(l>n)return n;
+        T s=id();
+        for(l+=n-1;;l>>=1){
+            while(!(l&1))l>>=1;
+            if(!f(op(s,t[l]))){
+                while(l<n){
+                    l<<=1;
+                    if(f(op(s,t[l]))){
+                        s=op(s,t[l]);
+                        ++l;
+                    }
+                }
+                return l-n;
+            }
+            s=op(s,t[l]);
+            if((l&-l)==l)break;
+            ++l;
+        }
+        return n;
+    }
+
+    // Smallest l such that op(a[l..r]) satisfies f.
+    // Returns r+1 if the last element fails.
+    template<class F>
+    int min_left(int r,F f)const{
+        if(r<1)return 1;
+        T s=id();
+        for(r+=n;;r>>=1){
+            --r;
+            while(r>1&&(r&1))r>>=1;
+            if(!f(op(t[r],s))){
+                while(r<n){
+                    r=r<<1|1;
+                    if(f(op(t[r],s))){
+                        s=op(t[r],s);
+                        --r;
+                    }
+                }
+                return r+2-n;
+            }
+            s=op(t[r],s);
+            if((r&-r)==r)break;
+        }
+        return 1;
+    }
+    template<class F>
+    int find_first(int l,F f)const{
+        return max_right(l,[&](T x){return !f(x);})+1;
     }
 };
 
@@ -432,12 +502,15 @@ struct LazySegTree {
     Vec<Node> t;
     Vec<Tag> lazy;
 
+    int L,R;
     LazySegTree(int n)
-        : n(n), t(4 * n + 5), lazy(4 * n + 5) {}
+        : n(n),L(1),R(n), t(4 * n + 5), lazy(4 * n + 5) {}
+    LazySegTree(int n,int l,int r)
+        : n(n),L(l),R(r),t(4 * n + 5), lazy(4 * n + 5) {}
 
     LazySegTree(const Vec<ll>& a)
         : LazySegTree((int)a.size() - 1) {
-        build(1, 1, n, a);
+        build(1, L, R, a);
     }
 
     static Node merge(const Node& a, const Node& b) {
@@ -449,16 +522,16 @@ struct LazySegTree {
     }
 
     void add(int l, int r, ll x) {
-        add(1, 1, n, l, r, x);
+        add(1, L, R, l, r, x);
     }
 
     void set(int l, int r, ll x) {
         if(r<l)return;
-        set(1, 1, n, l, r, x);
+        set(1, L, R, l, r, x);
     }
 
     Node query(int l, int r) {
-        return query(1, 1, n, l, r);
+        return query(1, L, R, l, r);
     }
 
     ll sum(int l, int r) {
@@ -735,49 +808,36 @@ T& chmax(T&v, const T&a){
     return v;
 }
 
-struct RangeContainer {
+
+struct RangeContainer{
     using ll=long long;
+    std::map<ll,ll> ranges;
     void add(ll l,ll r){
-        auto it=lower_bound(v.begin(),v.end(),l,[](const pii&p,ll x){
-            return p.second+1<x;
-        });
-        auto jt=it;
-        while(jt!=v.end()&&jt->first<=r+1){
-            l=std::min(l,jt->first);
-            r=std::max(r,jt->second);
-            ++jt;
+        auto it=ranges.lower_bound(l);
+        if(it!=ranges.begin()&&prev(it)->second>=l-1)--it;
+        while(it!=ranges.end()&&it->first<=r+1){
+            l=std::min(l,it->first);
+            r=std::max(r,it->second);
+            it=ranges.erase(it);
         }
-        it=v.erase(it,jt);
-        v.insert(it,{l,r});
+        ranges[l]=r;
     }
-
-    // First range containing point $x$
     auto containing(ll x){
-        auto it=lower_bound(v.begin(),v.end(),x,[](const pii&p,ll x){
-            return p.second<x;
-        });
-        if(it!=v.end()&&it->first<=x)return it;
-        return v.end();
+        auto it=ranges.upper_bound(x);
+        if(it==ranges.begin())return ranges.end();
+        --it;
+        return it->second>=x?it:ranges.end();
     }
-    // First range completely containing $[l,r]$
     auto containing(ll l,ll r){
-        auto it=lower_bound(v.begin(),v.end(),l,[](const pii&p,ll x){
-            return p.second<x;
-        });
-        if(it!=v.end()&&it->first<=l&&r<=it->second)return it;
-        return v.end();
+        auto it=containing(l);
+        return it!=ranges.end()&&it->second>=r?it:ranges.end();
     }
-
-    // First range overlapping $[l,r]$
     auto overlapping(ll l,ll r){
-        auto it=lower_bound(v.begin(),v.end(),l,[](const pii&p,ll x){
-            return p.second<x;
-        });
-        if(it!=v.end()&&it->first<=r)return it;
-        return v.end();
+        auto it=ranges.upper_bound(l);
+        if(it!=ranges.begin()&&prev(it)->second>=l)return prev(it);
+        if(it!=ranges.end()&&it->first<=r)return it;
+        return ranges.end();
     }
-
-    Vec<pii> v;
 };
 
 #define FOR(i,a,b) for(int i=(int)(a);i<=(int)(b);i++)
@@ -785,6 +845,12 @@ struct RangeContainer {
 #define IOIV(src,dst) \
     Vec<std::remove_cvref_t<decltype(src[0])>>dst(src.size()+1); \
     for(int i=1;i<=src.size();i++)dst[i]=src[i-1];
+#if defined(__cpp_explicit_this_parameter) && __cpp_explicit_this_parameter >= 202110L
+#define LAM(name, ...)
+#else
+#define LAM(name, ...) 
+#endif
+
 #define __t template
 #define __T typename
 #define _U(a,b) using _ ## a = b;
