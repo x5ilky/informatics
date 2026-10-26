@@ -5,5 +5,6 @@
 **/.DS_Store
 **/*.dSYM/
 **/a.out
+**/combined.cpp
 
 **/*.e.cpp
