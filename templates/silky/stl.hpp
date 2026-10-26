@@ -3,6 +3,8 @@
 #define _SILKY_TL
 #include <bits/stdc++.h>
 
+using ll=long long;
+
 template <class T>
 struct Reader;
 #define _impl_read_cin(t) \
@@ -17,7 +19,7 @@ _impl_read_cin(bool);
 _impl_read_cin(std::string);
 _impl_read_cin(char);
 _impl_read_cin(short);
-_impl_read_cin(long long);
+_impl_read_cin(ll);
 _impl_read_cin(float);
 _impl_read_cin(double);
 template <class T>
@@ -34,7 +36,7 @@ _impl_write_cout(bool);
 _impl_write_cout(std::string);
 _impl_write_cout(char);
 _impl_write_cout(short);
-_impl_write_cout(long long);
+_impl_write_cout(ll);
 _impl_write_cout(float);
 _impl_write_cout(double);
 
@@ -113,7 +115,15 @@ struct Vec : std::vector<T> {
     T max(int l=1){
         return max(l,this->sz()-1);
     }
+    void rsort(int l,int r){
+        std::sort(this->begin()+l,this->begin()+(r+1),std::greater<T>{});
+    }
+    void rsort(int l=1){
+        rsort(l,this->sz()-1);
+    }
 };
+
+
 template <class T>
 struct Reader<Vec<T>> {
     static void read(Vec<T>&v) {
@@ -156,7 +166,7 @@ void write_one(T& x) {
 template<class... T>
 void write(T... x) {
     (write_one(x), ...);
-    std::cout<<std::endl;
+    std::cout<<'\n';
 }
 struct DSU {
     Vec<int>e;
@@ -171,7 +181,14 @@ struct DSU {
         return 1;
     }
 };
-using pii=std::pair<long long,long long>;
+using pii=std::pair<ll,ll>;
+using ai3=std::array<ll,3>;
+using ai4=std::array<ll,4>;
+struct uvw{
+    ll u,v,w;
+    auto operator<=>(const uvw&o)const=default;
+};
+
 template <bool directed = 0>
 struct Graph{
     int N;
@@ -293,7 +310,7 @@ constexpr int lg(T x) {
     if constexpr (sizeof(U) <= sizeof(unsigned))
         return 31 - __builtin_clz(static_cast<unsigned>(x));
     else
-        return 63 - __builtin_clzll(static_cast<unsigned long long>(x));
+        return 63 - __builtin_clzll(static_cast<unsigned ll>(x));
 #endif
 }
 template<typename T,auto id,auto f>
@@ -326,45 +343,45 @@ struct Stable{
     }
 };
 namespace MonoidAdd{
-    using T=long long;
+    using T=ll;
     constexpr T id(){ return 0; };
     constexpr T op(T a,T b){ return a+b; };
 };
 namespace MonoidMin{
-    using T=long long;
+    using T=ll;
     constexpr T id(){ return LLONG_MAX; };
     constexpr T op(T a,T b){ return std::min(a,b); };
 };
 namespace MonoidMax{
-    using T=long long;
+    using T=ll;
     constexpr T id(){ return LLONG_MIN; };
     constexpr T op(T a,T b){ return std::max(a,b); };
 };
-using StableSum=Stable<long long, MonoidAdd::id,MonoidAdd::op>;
-using StableMin=Stable<long long, MonoidMin::id,MonoidMin::op>;
-using StableMax=Stable<long long, MonoidMax::id,MonoidMax::op>;
+using StableSum=Stable<ll, MonoidAdd::id,MonoidAdd::op>;
+using StableMin=Stable<ll, MonoidMin::id,MonoidMin::op>;
+using StableMax=Stable<ll, MonoidMax::id,MonoidMax::op>;
 struct DoubleFenwick {
     int N;
-    Vec<long long>T1,T2;
+    Vec<ll>T1,T2;
     DoubleFenwick(int N):N(N),T1(N+2),T2(N+2) {}
-    void add(Vec<long long>&T,int i,long long x) {
+    void add(Vec<ll>&T,int i,ll x) {
         for (;i<=N;i+=i&-i)T[i]+=x;
     }
-    long long query(const Vec<long long>&T,int i) const {
-        long long ans=0;
+    ll query(const Vec<ll>&T,int i) const {
+        ll ans=0;
         for (;i>0;i-=i&-i)ans+=T[i];
         return ans;
     }
-    void range_add(int l, int r, long long x) {
+    void range_add(int l, int r, ll x) {
         add(T1,l,x);
         add(T1,r+1,-x);
         add(T2,l,x*(l-1));
         add(T2,r+1,-x*r);
     }
-    long long prefix_sum(int i) const {
+    ll prefix_sum(int i) const {
         return query(T1,i)*i-query(T2,i);
     }
-    long long range_sum(int l,int r) const {
+    ll range_sum(int l,int r) const {
         return prefix_sum(r)-prefix_sum(l-1);
     }
 };
@@ -480,11 +497,11 @@ struct ISegtree {
     }
 };
 
-using SegtreeSum=ISegtree<long long, MonoidAdd::id,MonoidAdd::op>;
-using SegtreeMin=ISegtree<long long, MonoidMin::id,MonoidMin::op>;
-using SegtreeMax=ISegtree<long long, MonoidMax::id,MonoidMax::op>;
+using SegtreeSum=ISegtree<ll, MonoidAdd::id,MonoidAdd::op>;
+using SegtreeMin=ISegtree<ll, MonoidMin::id,MonoidMin::op>;
+using SegtreeMax=ISegtree<ll, MonoidMax::id,MonoidMax::op>;
 struct LazySegTree {
-    using ll = long long;
+    using ll = ll;
 
     struct Node {
         ll sum = 0;
@@ -653,7 +670,7 @@ private:
     }
 };
 
-template<class T = long long>
+template<class T = ll>
 struct PersistentSegtree {
     struct Node {
         int lc = 0, rc = 0;
@@ -810,7 +827,7 @@ T& chmax(T&v, const T&a){
 
 
 struct RangeContainer{
-    using ll=long long;
+    using ll=ll;
     std::map<ll,ll> ranges;
     void add(ll l,ll r){
         auto it=ranges.lower_bound(l);
@@ -839,6 +856,11 @@ struct RangeContainer{
         return ranges.end();
     }
 };
+
+template <typename T>
+using PQ=std::priority_queue<T>;
+template <typename T>
+using PQGT=std::priority_queue<T,std::vector<T>,std::greater<T>>;
 
 #define FOR(i,a,b) for(int i=(int)(a);i<=(int)(b);i++)
 #define ROF(i,a,b) for(int i=(int)(a);i>=(int)(b);i--)
@@ -870,6 +892,15 @@ _fs(os,fmt,args...);os<<'\n';
 } __t<__T...Args>void print(const _S& fmt,const Args&...args){print(std::cerr,fmt,args...);} __t<__T...Args>void println(const _S& fmt,const Args&...args){println(std::cerr,fmt,args...);} }
 #define dprint(...) dbg::println(__VA_ARGS__)
 #define dcheck(v) dbg::println("{} = {}",#v,v)
+#define fastio() std::cin.tie(0)->sync_with_stdio(0)
+
+#define READ(t,...) t __VA_ARGS__; read(__VA_ARGS__)
+
+#ifdef PRAGMA
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+epragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
+#endif//PRAGMA
 
 #endif
 
