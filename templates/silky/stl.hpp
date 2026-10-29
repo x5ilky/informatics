@@ -182,6 +182,7 @@ struct DSU {
     }
 };
 using pii=std::pair<ll,ll>;
+using ai2=std::array<ll,2>;
 using ai3=std::array<ll,3>;
 using ai4=std::array<ll,4>;
 struct uvw{
