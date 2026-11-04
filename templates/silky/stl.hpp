@@ -76,6 +76,14 @@ struct Vec : std::vector<T> {
         this->emplace_back();
         for(auto&x:V)this->emplace_back(std::move(x));
     }
+    template <class F>
+    void sort(F fn,int l,int r){
+        std::sort(fn,this->begin()+l,this->begin()+(r+1),fn);
+    }
+    template <class F>
+    void sort(F fn,int l=1){
+        std::sort(this->begin()+l,this->end(),fn);
+    }
     static Vec<T> from_zero(std::vector<T> V) {
         Vec<T>A;
         A.reserve(V.size()+1);
@@ -114,6 +122,29 @@ struct Vec : std::vector<T> {
     }
     T max(int l=1){
         return max(l,this->sz()-1);
+    }
+    template <class F>
+    bool any(F fn,int l,int r){
+        for(auto it=this->begin()+l;it!=this->begin()+(r+1);it++){
+            if(fn(*it))return true;
+        }
+        return false;
+    }
+    template <class F>
+    bool any(F fn,int l=1){
+        return any(fn,l,this->sz()-1);
+    }
+    template <class F>
+    bool all(F fn,int l,int r){
+        for(auto it=this->begin()+l;it!=this->begin()+(r+1);it++){
+            if(!fn(*it))return false;
+        }
+        return true;
+    }
+    template <class F>
+    bool all(F fn,int l=1){
+        return all(fn,l,this->sz()-1);
+
     }
     void rsort(int l,int r){
         std::sort(this->begin()+l,this->begin()+(r+1),std::greater<T>{});
@@ -231,6 +262,9 @@ struct Graph{
     void operator()(int u,int v,int w=1){
         g[u].push_back({v,w});
         if(!directed)g[v].push_back({u,w});
+    }
+    int deg(int u){
+        return g[u].size();
     }
     template<bool weighted=false>
     void read_graph(int M) {
@@ -585,6 +619,9 @@ struct LazySegTree {
     ll sum(int l, int r) {
         return query(l, r).sum;
     }
+    ll operator[](int idx) {
+        return query(idx, idx).sum;
+    }
 
     ll min(int l, int r) {
         return query(l, r).mn;
@@ -898,11 +935,7 @@ using PQGT=std::priority_queue<T,std::vector<T>,std::greater<T>>;
 #define IOIV(src,dst) \
     Vec<std::remove_cvref_t<decltype(src[0])>>dst(src.size()+1); \
     for(int i=1;i<=src.size();i++)dst[i]=src[i-1];
-#if defined(__cpp_explicit_this_parameter) && __cpp_explicit_this_parameter >= 202110L
-#define LAM(name, ...)
-#else
-#define LAM(name, ...) 
-#endif
+#define LAM(t,v) ([&](t){ return (v); })
 
 #define __t template
 #define __T typename
@@ -943,6 +976,18 @@ inline ll sqdist(pii a,pii b){
     ll dx=(b.first-a.first);
     ll dy=(b.second-a.second);
     return dx*dx+dy*dy;
+}
+inline void YES(bool x){
+    std::cout<<(x?"YES\n":"NO\n");
+}
+inline void Yes(bool x){
+    std::cout<<(x?"Yes\n":"No\n");
+}
+inline void Possible(bool x){
+    std::cout<<(x?"Possible\n":"Impossible\n");
+}
+inline void POSSIBLE(bool x){
+    std::cout<<(x?"POSSIBLE\n":"IMPOSSIBLE\n");
 }
 
 #endif
