@@ -140,6 +140,22 @@ struct Writer<Vec<T>> {
         }
     }
 };
+template <class T,auto n>
+struct Reader<std::array<T,n>> {
+    static void read(std::array<T,n>&v) {
+        for(int i=1;i<=n;i++)
+            Reader<T>::read(v[i-1]);
+    }
+};
+template <class T,auto n>
+struct Writer<std::array<T,n>> {
+    static void write(const std::array<T,n>&v) {
+        for(int i=1;i<=n;i++){
+            if(i!=1)std::cout<<" ";
+            Writer<T>::write(v[i-1]);
+        }
+    }
+};
 template <class T>
 struct Writer<Vec<Vec<T>>> {
     static void write(const Vec<Vec<T>>&v) {
@@ -147,6 +163,20 @@ struct Writer<Vec<Vec<T>>> {
             Writer<Vec<T>>::write(v[i]);
             std::cout<<"\n";
         }
+    }
+};
+template <class T,class U>
+struct Reader<std::pair<T,U>> {
+    static void read(std::pair<T,U>&v) {
+        Reader<T>::read(v.first);
+        Reader<U>::read(v.second);
+    }
+};
+template <class T,class U>
+struct Writer<std::pair<T,U>> {
+    static void write(const std::pair<T,U>&v) {
+        Writer<T>::write(v.first);
+        Writer<U>::write(v.second);
     }
 };
 
@@ -895,6 +925,12 @@ _fs(os,fmt,args...);os<<'\n';
 #define dcheck(v) dbg::println("{} = {}",#v,v)
 #define fastio() std::cin.tie(0)->sync_with_stdio(0)
 
+#ifdef DEBUG
+#define dwrite(v) write(v)
+#else
+#define dwrite(v) void()
+#endif
+
 #define READ(t,...) t __VA_ARGS__; read(__VA_ARGS__)
 
 #ifdef PRAGMA
@@ -902,6 +938,12 @@ _fs(os,fmt,args...);os<<'\n';
 #pragma GCC optimize("unroll-loops")
 epragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #endif//PRAGMA
+
+inline ll sqdist(pii a,pii b){
+    ll dx=(b.first-a.first);
+    ll dy=(b.second-a.second);
+    return dx*dx+dy*dy;
+}
 
 #endif
 
