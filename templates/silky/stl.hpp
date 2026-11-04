@@ -74,6 +74,14 @@ struct Vec : std::vector<T> {
         this->emplace_back();
         for(auto&x:V)this->emplace_back(std::move(x));
     }
+    template <class F>
+    void sort(F fn,int l,int r){
+        std::sort(fn,this->begin()+l,this->begin()+(r+1),fn);
+    }
+    template <class F>
+    void sort(F fn,int l=1){
+        std::sort(this->begin()+l,this->end(),fn);
+    }
     static Vec<T> from_zero(std::vector<T> V) {
         Vec<T>A;
         A.reserve(V.size()+1);
@@ -113,6 +121,28 @@ struct Vec : std::vector<T> {
     T max(int l=1){
         return max(l,this->sz()-1);
     }
+    template <class F>
+    bool any(F fn,int l,int r){
+        for(auto it=this->begin()+l;it!=this->begin()+(r+1);it++){
+            if(fn(*it))return true;
+        }
+        return false;
+    }
+    template <class F>
+    bool any(F fn,int l=1){
+        return any(fn,l,this->sz()-1);
+    }
+    template <class F>
+    bool all(F fn,int l,int r){
+        for(auto it=this->begin()+l;it!=this->begin()+(r+1);it++){
+            if(!fn(*it))return false;
+        }
+        return true;
+    }
+    template <class F>
+    bool all(F fn,int l=1){
+        return all(fn,l,this->sz()-1);
+    }
 };
 template <class T>
 struct Reader<Vec<T>> {
@@ -137,6 +167,21 @@ struct Writer<Vec<Vec<T>>> {
             Writer<Vec<T>>::write(v[i]);
             std::cout<<"\n";
         }
+    }
+};
+template <class T,class U>
+struct Reader<std::pair<T,U>> {
+    static void read(std::pair<T,U>&v) {
+        Reader<T>::read(v.first);
+        Reader<U>::read(v.second);
+    }
+};
+template <class T,class U>
+struct Writer<std::pair<T,U>> {
+    static void write(const std::pair<T,U>&v) {
+        Writer<T>::write(v.first);
+        std::cout<<" ";
+        Writer<U>::write(v.second);
     }
 };
 
@@ -183,6 +228,9 @@ struct Graph{
     void operator()(int u,int v,int w=1){
         g[u].push_back({v,w});
         if(!directed)g[v].push_back({u,w});
+    }
+    int deg(int u){
+        return g[u].size();
     }
     template<bool weighted=false>
     void read_graph(int M) {
@@ -537,6 +585,9 @@ struct LazySegTree {
     ll sum(int l, int r) {
         return query(l, r).sum;
     }
+    ll operator[](int idx) {
+        return query(idx, idx).sum;
+    }
 
     ll min(int l, int r) {
         return query(l, r).mn;
@@ -845,11 +896,7 @@ struct RangeContainer{
 #define IOIV(src,dst) \
     Vec<std::remove_cvref_t<decltype(src[0])>>dst(src.size()+1); \
     for(int i=1;i<=src.size();i++)dst[i]=src[i-1];
-#if defined(__cpp_explicit_this_parameter) && __cpp_explicit_this_parameter >= 202110L
-#define LAM(name, ...)
-#else
-#define LAM(name, ...) 
-#endif
+#define LAM(t,v) ([&](t){ return (v); })
 
 #define __t template
 #define __T typename
@@ -870,6 +917,19 @@ _fs(os,fmt,args...);os<<'\n';
 } __t<__T...Args>void print(const _S& fmt,const Args&...args){print(std::cerr,fmt,args...);} __t<__T...Args>void println(const _S& fmt,const Args&...args){println(std::cerr,fmt,args...);} }
 #define dprint(...) dbg::println(__VA_ARGS__)
 #define dcheck(v) dbg::println("{} = {}",#v,v)
+
+inline void YES(bool x){
+    std::cout<<(x?"YES\n":"NO\n");
+}
+inline void Yes(bool x){
+    std::cout<<(x?"Yes\n":"No\n");
+}
+inline void Possible(bool x){
+    std::cout<<(x?"Possible\n":"Impossible\n");
+}
+inline void POSSIBLE(bool x){
+    std::cout<<(x?"POSSIBLE\n":"IMPOSSIBLE\n");
+}
 
 #endif
 
