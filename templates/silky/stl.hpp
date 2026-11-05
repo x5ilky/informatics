@@ -96,9 +96,19 @@ struct Vec : std::vector<T> {
     }
     // DOES NOT INCLUDE ZEROTH ELEMENT
     Vec<T> ps() {
-        Vec<T>A(sz());
+        Vec<T>A(sz()+1);
         for(int i=1;i<=sz();i++){
             A[i]=A[i-1]+(*this)[i];
+        }
+        return A;
+    }
+    // Constructs difference array
+    // Note this difference array DOES include the zeroth element
+    // This assumes arr[0] = 0 so that dif[1] = arr[1].
+    Vec<T> dif() {
+        Vec<T>A(sz()+1);
+        for(int i=1;i<=sz();i++){
+            A[i]=(*this)[i]-(*this)[i-1];
         }
         return A;
     }
@@ -153,6 +163,18 @@ struct Vec : std::vector<T> {
         rsort(l,this->sz()-1);
     }
 };
+
+template<class T,int N>
+struct VecSImpl {
+    using type = Vec<typename VecSImpl<T,N-1>::type>;
+};
+
+template<class T>
+struct VecSImpl<T,0> {
+    using type = T;
+};
+template <class T,int cnt>
+using VecS = typename VecSImpl<T,cnt>::type;
 
 
 template <class T>
@@ -990,6 +1012,11 @@ inline void POSSIBLE(bool x){
     std::cout<<(x?"POSSIBLE\n":"IMPOSSIBLE\n");
 }
 
+#ifdef DEBUG
+#define Tmain() _asdfasdf(){} int solve(); int main() { READ(int,T); FOR(tt,1,T) { dprint("[[Testcase {}]]",tt); int ret=solve(); if(ret)return ret; } } int solve()
+#else
+#define Tmain() _asdfasdf(){} int solve(); int main() { READ(int,T); FOR(tt,1,T) { int ret=solve(); if(ret)return ret; } } int solve()
+#endif//DEBUG
 #endif
 
 // int main() {
