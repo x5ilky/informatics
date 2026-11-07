@@ -1,3 +1,24 @@
+// Silky TL Debug header
+//
+// Usage:
+//   To see debug messages, define the macro DEBUG:
+//     - either by #define DEBUG
+//     - or by using flag -DDEBUG during compilation
+//   Either include this file and use a file expander, or just paste
+//     this file at the top of your code.
+//   To print out messages, use `dbg::print()` or `dbt::println()`.
+//   This header AUTOMATICALLY INCLUDES <bits/stdc++.h>!!!!
+//
+// `dbg::print()`: !! ALWAYS PRINTS !!
+//   Each variable should have {} in place of its position.
+//   e.g. dbg::print("x = {}\n", x);
+// `dcheck(<expr>)`: <debug only>
+//   dcheck prints a message in the format `<expr> = <value of expr>`.
+//   e.g. dcheck(x + 3) prints `x + 3 = 67`.
+// `dprint()`: <debug only>
+//   The same as dbg::print, however only enabled with -DDEBUG
+//
+
 #ifndef _SILKY_DEBUG 
 #define _SILKY_DEBUG
 #include <bits/stdc++.h>
@@ -261,18 +282,14 @@ namespace dbg {
     template<class... Args>
     void print(std::ostream& os, const std::string& fmt,
                const Args&... args) {
-#ifdef DEBUG
         format(os, fmt, args...);
-#endif
     }
 
     template<class... Args>
     void println(std::ostream& os, const std::string& fmt,
                  const Args&... args) {
-#ifdef DEBUG
         format(os, fmt, args...);
         os << '\n';
-#endif
     }
 
     template<class... Args>
