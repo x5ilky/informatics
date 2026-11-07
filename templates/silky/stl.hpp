@@ -4,6 +4,30 @@
 #include <bits/stdc++.h>
 
 using ll=long long;
+#define sRESET   "\033[0m"
+#define sBLACK   "\033[30m"
+#define sRED     "\033[31m"
+#define sGREEN   "\033[32m"
+#define sYELLOW  "\033[33m"
+#define sBLUE    "\033[34m"
+#define sMAGENTA "\033[35m"
+#define sCYAN    "\033[36m"
+#define sWHITE   "\033[37m"
+
+#define sGRAY    "\033[90m"
+#define sBRED    "\033[91m"
+#define sBGREEN  "\033[92m"
+#define sBYELLOW "\033[93m"
+#define sBBLUE   "\033[94m"
+#define sBMAGENTA "\033[95m"
+#define sBCYAN   "\033[96m"
+#define sBWHITE  "\033[97m"
+
+#define sBOLD    "\033[1m"
+#define sDIM     "\033[2m"
+#define sITALIC  "\033[3m"
+#define sUNDER   "\033[4m"
+#define sSTRIKE  "\033[9m"
 
 template <class T>
 struct Reader;
@@ -966,7 +990,7 @@ _U(OS,std::ostream)_U(S,std::string)_U(F,std::false_type)_U(T,std::true_type);__
 #define _T_(d,c) __t<d>struct _is<c>:_T{};
 _T_(,_S);_T_(,char*);_T_(,const char*);_T_(size_t N,char[N]);_T_(size_t N,const char[N]);
 #undef _T_
-__t<class T>struct is_iterable{__t<class U>static auto test(int)->decltype(std::begin(std::declval<const U&>()),std::end(std::declval<const U&>()),_T{});__t<class>static _F test(...);static const bool value=decltype(test<T>(0))::value;}; __t<class A,class B>_OS& operator<<(_OS&,const std::pair<A,B>&); __t<class...Ts>_OS& operator<<(_OS&,const std::tuple<Ts...>&); __t<class T>__T std::enable_if<is_iterable<T>::value&&!_is<__T std::decay<T>::type>::value,_OS&>::type operator<<(_OS&,const T&); __t<class A,class B>_OS& operator<<(_OS& o,const std::pair<A,B>& p){return o<<'('<<p.first<<","<<p.second<<')';} __t<int I,class...Ts>__T std::enable_if<I==sizeof...(Ts),void>::type _pt(_OS&,const std::tuple<Ts...>&){} __t<int I,class...Ts>__T std::enable_if<I<sizeof...(Ts),void>::type _pt(_OS& o,const std::tuple<Ts...>& t){if(I)o<<",";o<<get<I>(t);_pt<I+1>(o,t);} __t<class...Ts>_OS& operator<<(_OS& o,const std::tuple<Ts...>& t){o<<'(';_pt<0>(o,t);return o<<')';} __t<class T>__T std::enable_if<is_iterable<T>::value&&!_is<__T std::decay<T>::type>::value,_OS&>::type operator<<(_OS& o,const T& v){o<<'[';bool f=0;for(const auto& x:v)o<<(f?",":""),f=1,o<<x;return o<<']';}
+__t<class T>struct is_iterable{__t<class U>static auto test(int)->decltype(std::begin(std::declval<const U&>()),std::end(std::declval<const U&>()),_T{});__t<class>static _F test(...);static const bool value=decltype(test<T>(0))::value;}; __t<class A,class B>_OS& operator<<(_OS&,const std::pair<A,B>&); __t<class...Ts>_OS& operator<<(_OS&,const std::tuple<Ts...>&); __t<class T>__T std::enable_if<is_iterable<T>::value&&!_is<__T std::decay<T>::type>::value,_OS&>::type operator<<(_OS&,const T&); __t<class A,class B>_OS& operator<<(_OS& o,const std::pair<A,B>& p){return o<<'('<<p.first<<", "<<p.second<<')';} __t<int I,class...Ts>__T std::enable_if<I==sizeof...(Ts),void>::type _pt(_OS&,const std::tuple<Ts...>&){} __t<int I,class...Ts>__T std::enable_if<I<sizeof...(Ts),void>::type _pt(_OS& o,const std::tuple<Ts...>& t){if(I)o<<", ";o<<get<I>(t);_pt<I+1>(o,t);} __t<class...Ts>_OS& operator<<(_OS& o,const std::tuple<Ts...>& t){o<<'(';_pt<0>(o,t);return o<<')';} __t<class T>__T std::enable_if<is_iterable<T>::value&&!_is<__T std::decay<T>::type>::value,_OS&>::type operator<<(_OS& o,const T& v){o<<sBOLD "[" sRESET;bool f=0;for(const auto& x:v)o<<(f?sGRAY ", " sRESET:""),f=1,o<<x;return o<<sBOLD "]" sRESET;}
 namespace dbg{ inline void _fs(_OS& os,const _S& fmt){os<<fmt;} __t<__T T,__T...Rest>void _fs(_OS& os,const _S& fmt,const T& value,const Rest&...rest){size_t pos=fmt.find("{}");if(pos==_S::npos)throw std::runtime_error("too many arguments for format _S");os<<fmt.substr(0,pos)<<value;_fs(os,fmt.substr(pos+2),rest...);} __t<__T...Args>void print(_OS& os,const _S& fmt,const Args&...args){
 #ifdef DEBUG
 _fs(os,fmt,args...);
@@ -977,13 +1001,15 @@ _fs(os,fmt,args...);os<<'\n';
 #endif
 } __t<__T...Args>void print(const _S& fmt,const Args&...args){print(std::cerr,fmt,args...);} __t<__T...Args>void println(const _S& fmt,const Args&...args){println(std::cerr,fmt,args...);} }
 #define dprint(...) dbg::println(__VA_ARGS__)
-#define dcheck(v) dbg::println("{} = {}",#v,v)
-#define fastio() std::cin.tie(0)->sync_with_stdio(0)
 
 #ifdef DEBUG
 #define dwrite(v) write(v)
+#define dcheck(v) dbg::println(sYELLOW "{}" sGRAY " = " sRESET "{}",#v,v)
+#define fastio() std::cin.tie(0)->sync_with_stdio(0)
 #else
 #define dwrite(v) void()
+#define dcheck(v) 
+#define fastio()
 #endif
 
 #define READ(t,...) t __VA_ARGS__; read(__VA_ARGS__)
@@ -999,24 +1025,32 @@ inline ll sqdist(pii a,pii b){
     ll dy=(b.second-a.second);
     return dx*dx+dy*dy;
 }
-inline void YES(bool x){
+inline int YES(bool x){
     std::cout<<(x?"YES\n":"NO\n");
+    return 0;
 }
-inline void Yes(bool x){
+inline int Yes(bool x){
     std::cout<<(x?"Yes\n":"No\n");
+    return 0;
 }
-inline void Possible(bool x){
+inline int Possible(bool x){
     std::cout<<(x?"Possible\n":"Impossible\n");
+    return 0;
 }
-inline void POSSIBLE(bool x){
+inline int POSSIBLE(bool x){
     std::cout<<(x?"POSSIBLE\n":"IMPOSSIBLE\n");
+    return 0;
 }
 
 #ifdef DEBUG
-#define Tmain() _asdfasdf(){} int solve(); int main() { READ(int,T); FOR(tt,1,T) { dprint("[[Testcase {}]]",tt); int ret=solve(); if(ret)return ret; } } int solve()
+#define Tmain() _asdfasdf(){} int solve(); signed main() { READ(int,T); FOR(tt,1,T) { dprint("[[Testcase {}]]",tt); int ret=solve(); if(ret)return ret; } } int solve()
+#define debug() if(1)
 #else
-#define Tmain() _asdfasdf(){} int solve(); int main() { READ(int,T); FOR(tt,1,T) { int ret=solve(); if(ret)return ret; } } int solve()
+#define Tmain() _asdfasdf(){} int solve(); signed main() { READ(int,T); FOR(tt,1,T) { int ret=solve(); if(ret)return ret; } } int solve()
+#define debug() if(0)
 #endif//DEBUG
+
+
 #endif
 
 // int main() {
