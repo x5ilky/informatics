@@ -80,11 +80,36 @@ struct is_iterable {
     static const bool value = decltype(test<T>(0))::value;
 };
 
-template<class T>
-struct is_vector : std::false_type {};
 
-template<class T, class Alloc>
-struct is_vector<std::vector<T, Alloc>> : std::true_type {};
+template<class T>
+struct is_vector {
+private:
+    template<class U, class Alloc>
+    static std::true_type test(const std::vector<U, Alloc>*);
+
+    static std::false_type test(...);
+
+public:
+    static constexpr bool value =
+        decltype(test(std::declval<
+            const typename std::decay<T>::type*
+        >()))::value;
+};
+
+template<class T, class = void>
+struct is_integer_vector : std::false_type {};
+
+template<class T>
+struct is_integer_vector<T,
+    typename std::enable_if<is_vector<T>::value>::type
+> : std::integral_constant<bool,
+    std::is_integral<
+        typename std::decay<T>::type::value_type
+    >::value &&
+    !std::is_same<
+        typename std::decay<T>::type::value_type, bool
+    >::value
+> {};
 
 template<class T>
 struct is_nested_vector {
@@ -99,18 +124,6 @@ struct is_nested_vector {
     using type = std::integral_constant<bool, value>;
 };
 
-template<class T>
-struct is_integer_vector {
-    using element_type = typename std::decay<
-        decltype(*std::begin(std::declval<const T&>()))
-    >::type;
-
-    static constexpr bool value =
-        std::is_integral<element_type>::value &&
-        !std::is_same<element_type, bool>::value;
-
-    using type = std::integral_constant<bool, value>;
-};
 
 template<class A, class B>
 std::ostream& operator<<(std::ostream&, const std::pair<A, B>&);
