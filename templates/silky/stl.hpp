@@ -962,10 +962,12 @@ using PQGT=std::priority_queue<T,std::vector<T>,std::greater<T>>;
 #include "./debug.hpp"
 
 #ifdef DEBUG
+#define dprint(...) dbg::println(__VA_ARGS__)
 #define dwrite(v) write(v)
 #define dcheck(v) dbg::println(sYELLOW "{}" sGRAY " = " sRESET "{}",#v,v)
 #define fastio() std::cin.tie(0)->sync_with_stdio(0)
 #else
+#define dprint(...) 
 #define dwrite(v) void()
 #define dcheck(v) 
 #define fastio()
@@ -976,7 +978,7 @@ using PQGT=std::priority_queue<T,std::vector<T>,std::greater<T>>;
 #ifdef PRAGMA
 #pragma GCC optimize("O3")
 #pragma GCC optimize("unroll-loops")
-epragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
+#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #endif//PRAGMA
 
 inline ll sqdist(pii a,pii b){
