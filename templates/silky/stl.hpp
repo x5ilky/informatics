@@ -96,8 +96,8 @@ struct Vec : std::vector<T> {
     }
     // DOES NOT INCLUDE ZEROTH ELEMENT
     Vec<T> ps() {
-        Vec<T>A(sz()+1);
-        for(int i=1;i<=sz();i++){
+        Vec<T>A(sz());
+        for(int i=1;i<=sz()-1;i++){
             A[i]=A[i-1]+(*this)[i];
         }
         return A;
